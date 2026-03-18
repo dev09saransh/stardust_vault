@@ -132,8 +132,8 @@ class LoginScreen extends StatelessWidget {
                         GradientButton(
                             text: 'Login',
                             onPressed: () =>
-                                Navigator.pushReplacementNamed(
-                                    context, '/dashboard')),
+                                Navigator.pushNamed(
+                                    context, '/otp-verification')),
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,8 +211,8 @@ class SignupScreen extends StatelessWidget {
                         GradientButton(
                             text: 'Create Account',
                             onPressed: () =>
-                                Navigator.pushReplacementNamed(
-                                    context, '/dashboard')),
+                                Navigator.pushNamed(
+                                    context, '/otp-verification')),
                       ]),
                     ),
                   ],
@@ -332,6 +332,127 @@ class RecoverAccountScreen extends StatelessWidget {
                               ),
                             );
                           },
+                        ),
+                      ]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── OTP Verification ───
+class OTPVerificationScreen extends StatefulWidget {
+  const OTPVerificationScreen({super.key});
+
+  @override
+  State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
+}
+
+class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
+  final List<TextEditingController> _controllers =
+      List.generate(4, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+
+  @override
+  void dispose() {
+    for (var c in _controllers) {
+      c.dispose();
+    }
+    for (var f in _focusNodes) {
+      f.dispose();
+    }
+    super.dispose();
+  }
+
+  void _onChanged(String value, int index) {
+    if (value.isNotEmpty && index < 3) {
+      _focusNodes[index + 1].requestFocus();
+    } else if (value.isEmpty && index > 0) {
+      _focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StardustBackground(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: Column(
+                  children: [
+                    _backButton(context),
+                    const SizedBox(height: 16),
+                    Text('Verification',
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w300,
+                            color: AppTheme.platinum,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 8),
+                    Text('Enter the 4-digit code sent to your email',
+                        style: TextStyle(
+                            color: AppTheme.silverMist.withValues(alpha: 0.5),
+                            fontSize: 14)),
+                    const SizedBox(height: 32),
+                    GlassCard(
+                      child: Column(children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(
+                            4,
+                            (index) => SizedBox(
+                              width: 60,
+                              child: TextField(
+                                controller: _controllers[index],
+                                focusNode: _focusNodes[index],
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                maxLength: 1,
+                                style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.platinum),
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 16),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
+                                        color: AppTheme.lavenderAccent,
+                                        width: 2),
+                                  ),
+                                ),
+                                onChanged: (v) => _onChanged(v, index),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        GradientButton(
+                          text: 'Verify',
+                          onPressed: () {
+                            Navigator.pushReplacementNamed(context, '/dashboard');
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text('Resend Code',
+                              style: TextStyle(
+                                  color: AppTheme.lavenderAccent,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500)),
                         ),
                       ]),
                     ),

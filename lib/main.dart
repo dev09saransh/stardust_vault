@@ -28,6 +28,7 @@ class StardustVaultApp extends StatelessWidget {
           '/signup': (_) => const SignupScreen(),
           '/forgot-password': (_) => const ForgotPasswordScreen(),
           '/recover-account': (_) => const RecoverAccountScreen(),
+          '/otp-verification': (_) => const OTPVerificationScreen(),
           '/dashboard': (_) => const DashboardScreen(),
         };
 

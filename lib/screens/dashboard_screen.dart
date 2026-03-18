@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '../widgets/stardust_background.dart';
 import '../widgets/glass_card.dart';
 import '../theme.dart';
+import 'features/assets_screen.dart';
+import 'features/insurance_screen.dart';
+import 'features/passwords_screen.dart';
+import 'features/contacts_screen.dart';
+import 'features/legal_center_screen.dart';
+import 'features/settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -397,10 +403,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Navigator.push(
         ctx,
         PageRouteBuilder(
-          pageBuilder: (_, a, __) => FadeTransition(
-            opacity: a,
-            child: _FeaturePage(title: title, icon: icon),
-          ),
+          pageBuilder: (_, a, __) {
+            Widget page;
+            switch (title) {
+              case 'Assets':
+                page = const AssetsScreen();
+                break;
+              case 'Insurance':
+                page = const InsuranceScreen();
+                break;
+              case 'Passwords':
+                page = const PasswordsScreen();
+                break;
+              case 'Contacts':
+                page = const ContactsScreen();
+                break;
+              case 'Legal Center':
+                page = const LegalCenterScreen();
+                break;
+              case 'Settings':
+                page = const SettingsScreen();
+                break;
+              default:
+                page = _FeaturePage(title: title, icon: icon);
+            }
+            return FadeTransition(opacity: a, child: page);
+          },
           transitionDuration: const Duration(milliseconds: 300),
         ));
   }
