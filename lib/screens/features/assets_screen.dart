@@ -70,8 +70,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(asset['name']!,
                                             style: const TextStyle(
