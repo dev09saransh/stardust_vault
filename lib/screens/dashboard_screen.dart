@@ -89,7 +89,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Column(
                 children: [
                   _appBar(isWide),
-                  Expanded(child: _mainContent(context)),
+                  Expanded(child: _mainContentArea(context)),
                 ],
               ),
             ),
@@ -168,10 +168,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               selected: selected,
               onTap: () {
                 setState(() => _selectedIndex = i);
-                if (i > 0) {
-                  _showFeaturePage(context, item['label'] as String,
-                      item['icon'] as IconData);
-                }
                 // close drawer on mobile
                 if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
                   Navigator.pop(context);
@@ -260,8 +256,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ─── Main Content ───
-  Widget _mainContent(BuildContext context) {
+  // ─── Main Content Switcher ───
+  Widget _mainContentArea(BuildContext context) {
+    switch (_selectedIndex) {
+      case 0:
+        return _dashboardHome(context);
+      case 1:
+        return _PageWrapper(
+            child: AssetsScreen(
+                onBack: () => setState(() => _selectedIndex = 0)));
+      case 2:
+        return _PageWrapper(
+            child: InsuranceScreen(
+                onBack: () => setState(() => _selectedIndex = 0)));
+      case 3:
+        return _PageWrapper(
+            child: PasswordsScreen(
+                onBack: () => setState(() => _selectedIndex = 0)));
+      case 4:
+        return _PageWrapper(
+            child: ContactsScreen(
+                onBack: () => setState(() => _selectedIndex = 0)));
+      case 5:
+        return _PageWrapper(
+            child: LegalCenterScreen(
+                onBack: () => setState(() => _selectedIndex = 0)));
+      case 6:
+        return _PageWrapper(
+            child: SettingsScreen(
+                onBack: () => setState(() => _selectedIndex = 0)));
+      default:
+        return _dashboardHome(context);
+    }
+  }
+
+  // ─── Original Dashboard Content ───
+  Widget _dashboardHome(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
       child: Column(
@@ -400,37 +430,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _showFeaturePage(BuildContext ctx, String title, IconData icon) {
-    Navigator.push(
-        ctx,
-        PageRouteBuilder(
-          pageBuilder: (_, a, __) {
-            Widget page;
-            switch (title) {
-              case 'Assets':
-                page = const AssetsScreen();
-                break;
-              case 'Insurance':
-                page = const InsuranceScreen();
-                break;
-              case 'Passwords':
-                page = const PasswordsScreen();
-                break;
-              case 'Contacts':
-                page = const ContactsScreen();
-                break;
-              case 'Legal Center':
-                page = const LegalCenterScreen();
-                break;
-              case 'Settings':
-                page = const SettingsScreen();
-                break;
-              default:
-                page = _FeaturePage(title: title, icon: icon);
-            }
-            return FadeTransition(opacity: a, child: page);
-          },
-          transitionDuration: const Duration(milliseconds: 300),
-        ));
+    int index = -1;
+    switch (title) {
+      case 'Assets':
+        index = 1;
+        break;
+      case 'Insurance':
+        index = 2;
+        break;
+      case 'Passwords':
+        index = 3;
+        break;
+      case 'Contacts':
+        index = 4;
+        break;
+      case 'Legal Center':
+        index = 5;
+        break;
+      case 'Settings':
+        index = 6;
+        break;
+    }
+
+    if (index != -1) {
+      setState(() => _selectedIndex = index);
+    } else {
+      // Fallback for items not in sidebar
+      Navigator.push(
+          ctx,
+          PageRouteBuilder(
+            pageBuilder: (_, a, __) =>
+                FadeTransition(opacity: a, child: _FeaturePage(title: title, icon: icon)),
+            transitionDuration: const Duration(milliseconds: 300),
+          ));
+    }
   }
 }
 
@@ -491,6 +524,21 @@ class _SidebarTileState extends State<_SidebarTile> {
         ),
       ),
     );
+  }
+}
+
+// ─── Page Wrapper to hide individual headers when inside dashboard ───
+class _PageWrapper extends StatelessWidget {
+  final Widget child;
+  const _PageWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    // If the child is one of our feature screens, we might want to "unwrap" its Scaffold
+    // But for now, let's see how it looks. Feature screens have their own Scaffold and Back button.
+    // When inside the dashboard, the back button pops back to the previous screen (e.g. login).
+    // We should probably remove the back button from the feature screens header if they are inside here.
+    return child;
   }
 }
 

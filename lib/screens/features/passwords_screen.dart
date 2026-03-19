@@ -5,7 +5,8 @@ import '../../widgets/gradient_button.dart';
 import '../../theme.dart';
 
 class PasswordsScreen extends StatefulWidget {
-  const PasswordsScreen({super.key});
+  final VoidCallback? onBack;
+  const PasswordsScreen({super.key, this.onBack});
 
   @override
   State<PasswordsScreen> createState() => _PasswordsScreenState();
@@ -112,7 +113,7 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded,
                 color: AppTheme.silverMist),
-            onPressed: () => Navigator.pop(context),
+            onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
           const Text('Passwords',

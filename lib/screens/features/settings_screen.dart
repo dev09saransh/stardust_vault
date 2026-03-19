@@ -4,7 +4,8 @@ import '../../widgets/glass_card.dart';
 import '../../theme.dart';
 
 class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+  final VoidCallback? onBack;
+  const SettingsScreen({super.key, this.onBack});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded, color: AppTheme.silverMist),
-            onPressed: () => Navigator.pop(context),
+            onPressed: onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
           const Text('Settings',

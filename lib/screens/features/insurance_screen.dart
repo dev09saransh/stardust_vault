@@ -5,7 +5,8 @@ import '../../widgets/gradient_button.dart';
 import '../../theme.dart';
 
 class InsuranceScreen extends StatefulWidget {
-  const InsuranceScreen({super.key});
+  final VoidCallback? onBack;
+  const InsuranceScreen({super.key, this.onBack});
 
   @override
   State<InsuranceScreen> createState() => _InsuranceScreenState();
@@ -117,7 +118,7 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded,
                 color: AppTheme.silverMist),
-            onPressed: () => Navigator.pop(context),
+            onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
           const Text('Insurance',

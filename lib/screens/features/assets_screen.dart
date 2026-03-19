@@ -5,7 +5,8 @@ import '../../widgets/gradient_button.dart';
 import '../../theme.dart';
 
 class AssetsScreen extends StatefulWidget {
-  const AssetsScreen({super.key});
+  final VoidCallback? onBack;
+  const AssetsScreen({super.key, this.onBack});
 
   @override
   State<AssetsScreen> createState() => _AssetsScreenState();
@@ -117,7 +118,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded,
                 color: AppTheme.silverMist),
-            onPressed: () => Navigator.pop(context),
+            onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
           const Text('Assets',

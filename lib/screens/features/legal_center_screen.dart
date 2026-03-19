@@ -5,7 +5,8 @@ import '../../widgets/gradient_button.dart';
 import '../../theme.dart';
 
 class LegalCenterScreen extends StatefulWidget {
-  const LegalCenterScreen({super.key});
+  final VoidCallback? onBack;
+  const LegalCenterScreen({super.key, this.onBack});
 
   @override
   State<LegalCenterScreen> createState() => _LegalCenterScreenState();
@@ -112,7 +113,7 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded,
                 color: AppTheme.silverMist),
-            onPressed: () => Navigator.pop(context),
+            onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
           const Text('Legal Center',
