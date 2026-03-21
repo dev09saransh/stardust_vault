@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // ─── Vibrant Purple / Indigo palette ───
@@ -25,6 +26,7 @@ class AppTheme {
   );
 
   static ThemeData get darkTheme {
+    final baseTheme = ThemeData.dark();
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: darkBg,
@@ -36,14 +38,17 @@ class AppTheme {
         onPrimary: Colors.white,
         onSurface: silverMist,
       ),
-      fontFamily: 'Roboto',
+      textTheme: GoogleFonts.outfitTextTheme(baseTheme.textTheme).copyWith(
+        bodyLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyLarge),
+        bodyMedium: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyMedium),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: deepCharcoal,
-        contentTextStyle: const TextStyle(color: platinum),
+        contentTextStyle: GoogleFonts.inter(color: platinum),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -62,8 +67,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: lavenderAccent, width: 1.5),
         ),
-        hintStyle: TextStyle(color: silverMist.withValues(alpha: 0.4)),
-        labelStyle: TextStyle(color: silverMist.withValues(alpha: 0.7)),
+        hintStyle: GoogleFonts.inter(color: silverMist.withValues(alpha: 0.4)),
+        labelStyle: GoogleFonts.inter(color: silverMist.withValues(alpha: 0.7)),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),

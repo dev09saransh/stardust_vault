@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/stardust_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/glowing_text.dart';
 import '../theme.dart';
 
 // ─── Auth Selection ───
@@ -50,7 +51,7 @@ class AuthSelectionScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('Welcome',
+                    GlowingText('Welcome',
                         style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w300,
@@ -111,7 +112,7 @@ class LoginScreen extends StatelessWidget {
                   children: [
                     _backButton(context),
                     const SizedBox(height: 16),
-                    Text('Login',
+                    GlowingText('Login',
                         style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.w300,

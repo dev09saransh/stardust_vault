@@ -8,6 +8,8 @@ import 'features/passwords_screen.dart';
 import 'features/contacts_screen.dart';
 import 'features/legal_center_screen.dart';
 import 'features/settings_screen.dart';
+import 'package:animate_do/animate_do.dart';
+import '../widgets/glowing_text.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -245,23 +247,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Welcome back 👋',
-              style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w400,
-                  color: AppTheme.platinum)),
+          FadeInDown(
+            duration: const Duration(milliseconds: 600),
+            child: GlowingText('Welcome back 👋',
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.platinum)),
+          ),
           const SizedBox(height: 4),
-          Text('Manage your digital legacy securely',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: AppTheme.silverMist.withValues(alpha: 0.5))),
+          FadeInDown(
+            duration: const Duration(milliseconds: 600),
+            delay: const Duration(milliseconds: 100),
+            child: Text('Manage your digital legacy securely',
+                style: TextStyle(
+                    fontSize: 14,
+                    color: AppTheme.silverMist.withValues(alpha: 0.5))),
+          ),
           const SizedBox(height: 24),
-          _statsRow(),
+          FadeInUp(
+            duration: const Duration(milliseconds: 600),
+            delay: const Duration(milliseconds: 200),
+            child: _statsRow()),
           const SizedBox(height: 24),
-          Text('Quick Access',
+          GlowingText('Quick Access',
               style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.platinum)),
           const SizedBox(height: 16),
           _grid(context),
@@ -337,7 +349,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
       childAspectRatio: 1.5,
-      children: _gridItems.map((item) => _gridCard(context, item)).toList(),
+      children: List.generate(_gridItems.length, (index) {
+        return FadeInUp(
+          duration: const Duration(milliseconds: 500),
+          delay: Duration(milliseconds: 300 + (index * 100)),
+          child: _gridCard(context, _gridItems[index]),
+        );
+      }),
     );
   }
 
