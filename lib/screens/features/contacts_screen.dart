@@ -6,18 +6,15 @@ import '../../widgets/success_animation.dart';
 import '../../theme.dart';
 
 class ContactsScreen extends StatefulWidget {
+  final List<Map<String, String>> contacts;
   final VoidCallback? onBack;
-  const ContactsScreen({super.key, this.onBack});
+  const ContactsScreen({super.key, required this.contacts, this.onBack});
 
   @override
   State<ContactsScreen> createState() => _ContactsScreenState();
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
-  final List<Map<String, String>> _contacts = [
-    {'name': 'John Doe', 'relation': 'Brother', 'status': 'Verified'},
-    {'name': 'Jane Smith', 'relation': 'Spouse', 'status': 'Pending'},
-  ];
 
   void _addContact() {
     showModalBottomSheet(
@@ -26,7 +23,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => _AddContactSheet(onAdd: (name, relation) {
         setState(() {
-          _contacts.add({'name': name, 'relation': relation, 'status': 'Pending'});
+          widget.contacts.add({'name': name, 'relation': relation, 'status': 'Pending'});
         });
         SuccessAnimationOverlay.show(context);
       }),
@@ -42,13 +39,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
             children: [
               _header(context),
               Expanded(
-                child: _contacts.isEmpty
+                child: widget.contacts.isEmpty
                     ? _emptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(20),
-                        itemCount: _contacts.length,
+                        itemCount: widget.contacts.length,
                         itemBuilder: (context, index) {
-                          final c = _contacts[index];
+                          final c = widget.contacts[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: GlassCard(

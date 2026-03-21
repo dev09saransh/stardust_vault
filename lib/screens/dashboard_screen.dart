@@ -121,7 +121,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ... (sidebar and app bar methods remain mostly same, but using IndexedStack in _mainContentArea)
+  // ─── Sidebar & Navigation ───
+  Widget _sidebar() {
+    return Container(
+      width: 260,
+      decoration: BoxDecoration(
+        border: Border(
+          right: BorderSide(
+            color: AppTheme.lavenderAccent.withValues(alpha: 0.1),
+          ),
+        ),
+      ),
+      child: _sidebarContent(),
+    );
+  }
+
+  Widget _sidebarContent() {
+    return Column(
+      children: [
+        const SizedBox(height: 50),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Icon(Icons.shield_rounded, color: AppTheme.lavenderAccent, size: 32),
+              const SizedBox(width: 12),
+              Text('Stardust',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.platinum)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 40),
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: _menuItems.length,
+            itemBuilder: (context, index) {
+              final item = _menuItems[index];
+              return _SidebarTile(
+                icon: item['icon'] as IconData,
+                label: item['label'] as String,
+                selected: _selectedIndex == index,
+                onTap: () {
+                  setState(() => _selectedIndex = index);
+                  if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
+                    Navigator.pop(context);
+                  }
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _appBar(bool isWide) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+      child: Row(
+        children: [
+          if (!isWide)
+            IconButton(
+              icon: Icon(Icons.menu_rounded, color: AppTheme.platinum),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.lavenderAccent.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.person_outline_rounded,
+                color: AppTheme.lavenderAccent, size: 20),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   // ─── Main Content Switcher with IndexedStack ───
   Widget _mainContentArea(BuildContext context) {

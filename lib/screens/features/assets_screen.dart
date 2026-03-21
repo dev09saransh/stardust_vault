@@ -6,18 +6,15 @@ import '../../widgets/success_animation.dart';
 import '../../theme.dart';
 
 class AssetsScreen extends StatefulWidget {
+  final List<Map<String, String>> assets;
   final VoidCallback? onBack;
-  const AssetsScreen({super.key, this.onBack});
+  const AssetsScreen({super.key, required this.assets, this.onBack});
 
   @override
   State<AssetsScreen> createState() => _AssetsScreenState();
 }
 
 class _AssetsScreenState extends State<AssetsScreen> {
-  final List<Map<String, String>> _assets = [
-    {'name': 'Bitcoin Wallet', 'value': '0.5 BTC', 'type': 'Digital'},
-    {'name': 'Safe Deposit Box', 'value': 'Key #123', 'type': 'Physical'},
-  ];
 
   void _addAsset() {
     showModalBottomSheet(
@@ -26,7 +23,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => _AddAssetSheet(onAdd: (name, value, type) {
         setState(() {
-          _assets.add({'name': name, 'value': value, 'type': type});
+          widget.assets.add({'name': name, 'value': value, 'type': type});
         });
         SuccessAnimationOverlay.show(context);
       }),
@@ -42,13 +39,13 @@ class _AssetsScreenState extends State<AssetsScreen> {
             children: [
               _header(context),
               Expanded(
-                child: _assets.isEmpty
+                child: widget.assets.isEmpty
                     ? _emptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(20),
-                        itemCount: _assets.length,
+                        itemCount: widget.assets.length,
                         itemBuilder: (context, index) {
-                          final asset = _assets[index];
+                          final asset = widget.assets[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: GlassCard(

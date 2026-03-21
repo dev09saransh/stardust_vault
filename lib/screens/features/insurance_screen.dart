@@ -6,18 +6,15 @@ import '../../widgets/success_animation.dart';
 import '../../theme.dart';
 
 class InsuranceScreen extends StatefulWidget {
+  final List<Map<String, String>> policies;
   final VoidCallback? onBack;
-  const InsuranceScreen({super.key, this.onBack});
+  const InsuranceScreen({super.key, required this.policies, this.onBack});
 
   @override
   State<InsuranceScreen> createState() => _InsuranceScreenState();
 }
 
 class _InsuranceScreenState extends State<InsuranceScreen> {
-  final List<Map<String, String>> _policies = [
-    {'provider': 'Star Health', 'policyNo': 'POL-8822', 'type': 'Health'},
-    {'provider': 'Liberty General', 'policyNo': 'VEH-9933', 'type': 'Vehicle'},
-  ];
 
   void _addPolicy() {
     showModalBottomSheet(
@@ -26,7 +23,7 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => _AddPolicySheet(onAdd: (provider, policyNo, type) {
         setState(() {
-          _policies.add({'provider': provider, 'policyNo': policyNo, 'type': type});
+          widget.policies.add({'provider': provider, 'policyNo': policyNo, 'type': type});
         });
         SuccessAnimationOverlay.show(context);
       }),
@@ -42,13 +39,13 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
             children: [
               _header(context),
               Expanded(
-                child: _policies.isEmpty
+                child: widget.policies.isEmpty
                     ? _emptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(20),
-                        itemCount: _policies.length,
+                        itemCount: widget.policies.length,
                         itemBuilder: (context, index) {
-                          final policy = _policies[index];
+                          final policy = widget.policies[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: GlassCard(

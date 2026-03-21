@@ -6,18 +6,15 @@ import '../../widgets/success_animation.dart';
 import '../../theme.dart';
 
 class LegalCenterScreen extends StatefulWidget {
+  final List<Map<String, String>> docs;
   final VoidCallback? onBack;
-  const LegalCenterScreen({super.key, this.onBack});
+  const LegalCenterScreen({super.key, required this.docs, this.onBack});
 
   @override
   State<LegalCenterScreen> createState() => _LegalCenterScreenState();
 }
 
 class _LegalCenterScreenState extends State<LegalCenterScreen> {
-  final List<Map<String, String>> _docs = [
-    {'title': 'Will & Testament', 'date': '2025-10-12', 'status': 'Signed'},
-    {'title': 'Property Deed', 'date': '2024-05-20', 'status': 'Vaulted'},
-  ];
 
   void _addDoc() {
     showModalBottomSheet(
@@ -26,7 +23,7 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => _AddDocSheet(onAdd: (title) {
         setState(() {
-          _docs.add({'title': title, 'date': 'Today', 'status': 'Pending'});
+          widget.docs.add({'title': title, 'date': 'Today', 'status': 'Pending'});
         });
         SuccessAnimationOverlay.show(context);
       }),
@@ -42,13 +39,13 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
             children: [
               _header(context),
               Expanded(
-                child: _docs.isEmpty
+                child: widget.docs.isEmpty
                     ? _emptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(20),
-                        itemCount: _docs.length,
+                        itemCount: widget.docs.length,
                         itemBuilder: (context, index) {
-                          final d = _docs[index];
+                          final d = widget.docs[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: GlassCard(

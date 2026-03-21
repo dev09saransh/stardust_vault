@@ -6,18 +6,15 @@ import '../../widgets/success_animation.dart';
 import '../../theme.dart';
 
 class PasswordsScreen extends StatefulWidget {
+  final List<Map<String, String>> passwords;
   final VoidCallback? onBack;
-  const PasswordsScreen({super.key, this.onBack});
+  const PasswordsScreen({super.key, required this.passwords, this.onBack});
 
   @override
   State<PasswordsScreen> createState() => _PasswordsScreenState();
 }
 
 class _PasswordsScreenState extends State<PasswordsScreen> {
-  final List<Map<String, String>> _passwords = [
-    {'site': 'Google', 'username': 'user@gmail.com', 'pass': '••••••••'},
-    {'site': 'Amazon', 'username': 'user_shop', 'pass': '••••••••'},
-  ];
 
   void _addPassword() {
     showModalBottomSheet(
@@ -26,7 +23,7 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => _AddPasswordSheet(onAdd: (site, username, pass) {
         setState(() {
-          _passwords.add({'site': site, 'username': username, 'pass': pass});
+          widget.passwords.add({'site': site, 'username': username, 'pass': pass});
         });
         SuccessAnimationOverlay.show(context);
       }),
@@ -42,13 +39,13 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
             children: [
               _header(context),
               Expanded(
-                child: _passwords.isEmpty
+                child: widget.passwords.isEmpty
                     ? _emptyState()
                     : ListView.builder(
                         padding: const EdgeInsets.all(20),
-                        itemCount: _passwords.length,
+                        itemCount: widget.passwords.length,
                         itemBuilder: (context, index) {
-                          final p = _passwords[index];
+                          final p = widget.passwords[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16),
                             child: GlassCard(
