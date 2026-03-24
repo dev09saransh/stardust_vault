@@ -61,6 +61,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   bool _showIntro = true;
   bool _showTour = false;
+  bool _showCatalog = false;
 
   static const _menuItems = [
     {'icon': Icons.dashboard_rounded, 'label': 'Dashboard'},
@@ -149,7 +150,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     children: [
                       _appBar(isWide),
-                      Expanded(child: _mainContentArea(context)),
+                      Expanded(child: _mainContentArea(context, isWide)),
                     ],
                   ),
                 ),
@@ -222,6 +223,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   });
                 },
               ),
+            if (_showCatalog)
+              _catalogOverlay(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _catalogOverlay() {
+    final categories = [
+      {'label': 'Real Estate', 'icon': Icons.home_work_outlined, 'color': Colors.blue},
+      {'label': 'Bank Accounts', 'icon': Icons.account_balance_outlined, 'color': Colors.green},
+      {'label': 'Investments', 'icon': Icons.trending_up_rounded, 'color': Colors.orange},
+      {'label': 'Insurance', 'icon': Icons.security_outlined, 'color': Colors.red},
+      {'label': 'Passwords', 'icon': Icons.password_outlined, 'color': Colors.teal},
+      {'label': 'Legal Docs', 'icon': Icons.gavel_outlined, 'color': Colors.purple},
+      {'label': 'Contacts', 'icon': Icons.people_outline, 'color': Colors.indigo},
+      {'label': 'Settings', 'icon': Icons.settings_outlined, 'color': Colors.grey},
+    ];
+
+    return FadeIn(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.8),
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FadeInDown(
+              child: const Text('Asset Catalog', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+            ),
+            const SizedBox(height: 40),
+            Container(
+              constraints: const BoxConstraints(maxWidth: 800),
+              padding: const EdgeInsets.all(20),
+              child: Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                alignment: WrapAlignment.center,
+                children: List.generate(categories.length, (index) {
+                  final cat = categories[index];
+                  return FadeInUp(
+                    delay: Duration(milliseconds: 100 * index),
+                    child: InkWell(
+                      onTap: () => setState(() => _showCatalog = false),
+                      child: GlassCard(
+                        width: 160,
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          children: [
+                            Icon(cat['icon'] as IconData, color: cat['color'] as Color, size: 32),
+                            const SizedBox(height: 12),
+                            Text(cat['label'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 48),
+            FadeInUp(
+              delay: const Duration(milliseconds: 800),
+              child: _actionButton(
+                label: 'Close Catalog',
+                icon: Icons.close_rounded,
+                onPressed: () => setState(() => _showCatalog = false),
+                isPrimary: true,
+              ),
+            ),
           ],
         ),
       ),
@@ -483,13 +555,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // ─── Main Content Switcher ───
-  Widget _mainContentArea(BuildContext context) {
-    if (_selectedIndex == 0) return _dashboardHome(context);
-
+  Widget _mainContentArea(BuildContext context, bool isWide) {
     // Filter screens
     final screens = [
-      _dashboardHome(context),
+      _dashboardHome(context, isWide),
       AssetsScreen(assets: _assets, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
       InsuranceScreen(policies: _policies, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
       PasswordsScreen(passwords: _passwords, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
@@ -501,7 +570,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return screens[_selectedIndex];
   }
 
-  Widget _dashboardHome(BuildContext context) {
+  Widget _dashboardHome(BuildContext context, bool isWide) {
     final welcomeMsg = widget.isGuest 
         ? 'Welcome' 
         : (widget.isLogin ? 'Welcome back 👋' : 'Welcome 👋');
@@ -684,7 +753,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SizedBox(width: 16),
         _heroButton(
           label: 'View Catalog',
-          onPressed: () {},
+          onPressed: () => setState(() => _showCatalog = true),
           isPrimary: false,
           isGhost: true,
         ),
