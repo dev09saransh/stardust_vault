@@ -7,6 +7,9 @@ import '../../widgets/add_asset_sheet.dart';
 import '../../widgets/login_prompt.dart';
 import '../../theme.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import '../../widgets/add_doc_sheet.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AssetsScreen extends StatefulWidget {
   final List<Map<String, String>> assets;
@@ -59,22 +62,51 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
     );
   }
 
+  void _onFileDropped(XFile file) {
+    if (widget.isGuest) {
+      LoginRequiredPrompt.show(context);
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => AddDocSheet(
+        type: 'Asset',
+        initialFile: file,
+        onAdd: (title) {
+          setState(() {
+            widget.assets.add({
+              'name': title,
+              'value': 'Uploaded File',
+              'type': 'Physical'
+            });
+          });
+          SuccessAnimationOverlay.show(context);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StardustBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _header(context),
-              _categoryTabs(),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: _categories.map((cat) => _buildAssetList(cat)).toList(),
+      body: DropZoneWrapper(
+        onDrop: _onFileDropped,
+        child: StardustBackground(
+          child: SafeArea(
+            child: Column(
+              children: [
+                _header(context),
+                _categoryTabs(),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: _categories.map((cat) => _buildAssetList(cat)).toList(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

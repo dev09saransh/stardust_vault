@@ -6,6 +6,9 @@ import '../../widgets/success_animation.dart';
 import '../../widgets/login_prompt.dart';
 import '../../theme.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import '../../widgets/add_doc_sheet.dart';
+import 'package:image_picker/image_picker.dart';
 
 class InsuranceScreen extends StatefulWidget {
   final List<Map<String, String>> policies;
@@ -37,78 +40,107 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
     );
   }
 
+  void _onFileDropped(XFile file) {
+    if (widget.isGuest) {
+      LoginRequiredPrompt.show(context);
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => AddDocSheet(
+        type: 'Insurance',
+        initialFile: file,
+        onAdd: (title) {
+          setState(() {
+            widget.policies.add({
+              'provider': title,
+              'policyNo': 'UPLOAD-${DateTime.now().millisecond}',
+              'type': 'General'
+            });
+          });
+          SuccessAnimationOverlay.show(context);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StardustBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _header(context),
-              Expanded(
-                child: widget.policies.isEmpty
-                    ? _emptyState(context)
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: widget.policies.length,
-                        itemBuilder: (context, index) {
-                          final policy = widget.policies[index];
-                          return FadeInUp(
-                            duration: const Duration(milliseconds: 400),
-                            delay: Duration(milliseconds: index * 100),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: GlassCard(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.primary
-                                            .withValues(alpha: 0.1),
-                                        shape: BoxShape.circle,
+      body: DropZoneWrapper(
+        onDrop: _onFileDropped,
+        child: StardustBackground(
+          child: SafeArea(
+            child: Column(
+              children: [
+                _header(context),
+                Expanded(
+                  child: widget.policies.isEmpty
+                      ? _emptyState(context)
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(20),
+                          itemCount: widget.policies.length,
+                          itemBuilder: (context, index) {
+                            final policy = widget.policies[index];
+                            return FadeInUp(
+                              duration: const Duration(milliseconds: 400),
+                              delay: Duration(milliseconds: index * 100),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: GlassCard(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary
+                                              .withValues(alpha: 0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          policy['type'] == 'Health'
+                                              ? Icons.health_and_safety_rounded
+                                              : Icons.directions_car_rounded,
+                                          color: Theme.of(context).colorScheme.primary,
+                                          size: 24,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        policy['type'] == 'Health'
-                                            ? Icons.health_and_safety_rounded
-                                            : Icons.directions_car_rounded,
-                                        color: Theme.of(context).colorScheme.primary,
-                                        size: 24,
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(policy['provider']!,
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Theme.of(context).colorScheme.onSurface)),
+                                            Text(policy['type']!,
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Theme.of(context).colorScheme.onSurfaceVariant
+                                                        .withValues(alpha: 0.6))),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(policy['provider']!,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Theme.of(context).colorScheme.onSurface)),
-                                          Text(policy['type']!,
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Theme.of(context).colorScheme.onSurfaceVariant
-                                                      .withValues(alpha: 0.6))),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(policy['policyNo']!,
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            color: Theme.of(context).colorScheme.onSurface)),
-                                  ],
+                                      Text(policy['policyNo']!,
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w400,
+                                              color: Theme.of(context).colorScheme.onSurface)),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

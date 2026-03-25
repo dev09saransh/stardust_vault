@@ -9,7 +9,14 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 class AddDocSheet extends StatefulWidget {
   final String type;
   final Function(String) onAdd;
-  const AddDocSheet({super.key, required this.type, required this.onAdd});
+  final XFile? initialFile;
+
+  const AddDocSheet({
+    super.key,
+    required this.type,
+    required this.onAdd,
+    this.initialFile,
+  });
 
   @override
   State<AddDocSheet> createState() => _AddDocSheetState();
@@ -19,6 +26,20 @@ class _AddDocSheetState extends State<AddDocSheet> {
   final _titleController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedFile;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialFile != null) {
+      _pickedFile = widget.initialFile;
+      // Pre-populate title from filename (removing extension and capitalizing)
+      final nameParts = _pickedFile!.name.split('.');
+      if (nameParts.isNotEmpty) {
+        final baseName = nameParts[0].replaceAll(RegExp(r'[-_]'), ' ');
+        _titleController.text = baseName.split(' ').map((s) => s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : '').join(' ');
+      }
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -86,6 +107,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
           const SizedBox(height: 32),
           TextField(
             controller: _titleController,
+            onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: 'Document Title',
               hintText: 'e.g. ${widget.type} Policy 2025',
@@ -142,7 +164,10 @@ class _AddDocSheetState extends State<AddDocSheet> {
               top: 8,
               right: 8,
               child: IconButton(
-                onPressed: () => setState(() => _pickedFile = null),
+                onPressed: () => setState(() {
+                  _pickedFile = null;
+                  _titleController.clear();
+                }),
                 icon: const Icon(Icons.cancel_rounded, color: Colors.white, size: 28),
                 style: IconButton.styleFrom(backgroundColor: Colors.black.withValues(alpha: 0.5)),
               ),
