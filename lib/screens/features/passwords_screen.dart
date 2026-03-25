@@ -5,6 +5,8 @@ import '../../widgets/success_animation.dart';
 import '../../widgets/add_password_sheet.dart';
 import '../../widgets/login_prompt.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import 'package:image_picker/image_picker.dart';
 
 class PasswordsScreen extends StatefulWidget {
   final List<Map<String, String>> passwords;
@@ -17,6 +19,12 @@ class PasswordsScreen extends StatefulWidget {
 }
 
 class _PasswordsScreenState extends State<PasswordsScreen> {
+
+  void _onFileDropped(XFile file) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('File drop not supported for Passwords!')),
+    );
+  }
 
   void _addPassword() {
     if (widget.isGuest) {
@@ -39,8 +47,10 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StardustBackground(
-        child: SafeArea(
+      body: DropZoneWrapper(
+        onDrop: _onFileDropped,
+        child: StardustBackground(
+          child: SafeArea(
           child: Column(
             children: [
               _header(context),
@@ -128,7 +138,7 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
           Text('Passwords',
               style: TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w900,
                   color: Theme.of(context).colorScheme.onSurface)),
         ],
       ),

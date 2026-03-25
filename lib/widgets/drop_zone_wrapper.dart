@@ -34,6 +34,34 @@ class _DropZoneWrapperState extends State<DropZoneWrapper> {
       },
       child: Stack(
         children: [
+          // ─── Permanent Hint Layer (Watermark) ───
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.05,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.cloud_upload_outlined,
+                      size: 200,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Drag & Drop Zone',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           widget.child,
           if (_isHovering)
             _buildDropOverlay(),
