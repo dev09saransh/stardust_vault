@@ -767,11 +767,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         : (widget.isLogin ? 'Welcome back 👋' : 'Welcome 👋');
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(40),
+      padding: EdgeInsets.all(isWide ? 40 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 20,
+            runSpacing: 20,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -788,14 +792,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   FadeInDown(
                     duration: const Duration(milliseconds: 600),
                     delay: const Duration(milliseconds: 100),
-                    child: Text('Monitor your global asset health and security status.',
-                        style: TextStyle(
-                            fontSize: 15,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: isWide ? 600 : MediaQuery.of(context).size.width - 40),
+                      child: Text('Monitor your global asset health and security status.',
+                          style: TextStyle(
+                              fontSize: 15,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+                    ),
                   ),
                 ],
               ),
-              const Spacer(),
               if (!widget.isGuest && widget.isLogin)
                 FadeInRight(
                   duration: const Duration(milliseconds: 600),
@@ -808,7 +814,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 48),
+          SizedBox(height: isWide ? 48 : 32),
           FadeInUp(
             duration: const Duration(milliseconds: 800),
             delay: const Duration(milliseconds: 200),
