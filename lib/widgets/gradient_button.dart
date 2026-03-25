@@ -3,14 +3,14 @@ import '../theme.dart';
 
 class GradientButton extends StatefulWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final double? width;
   final IconData? icon;
 
   const GradientButton({
     super.key,
     required this.text,
-    required this.onPressed,
+    this.onPressed,
     this.width,
     this.icon,
   });
@@ -24,10 +24,12 @@ class _GradientButtonState extends State<GradientButton> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEnabled = widget.onPressed != null;
+
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
+      onEnter: (_) => setState(() => _hovering = isEnabled),
       onExit: (_) => setState(() => _hovering = false),
-      cursor: SystemMouseCursors.click,
+      cursor: isEnabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
       child: GestureDetector(
         onTap: widget.onPressed,
         child: AnimatedContainer(
@@ -35,29 +37,46 @@ class _GradientButtonState extends State<GradientButton> {
           width: widget.width ?? double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            gradient: AppTheme.buttonGradient,
+            gradient: isEnabled
+                ? AppTheme.buttonGradient
+                : LinearGradient(
+                    colors: [
+                      Colors.grey.withValues(alpha: 0.2),
+                      Colors.grey.withValues(alpha: 0.1)
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.lavenderAccent
-                    .withValues(alpha: _hovering ? 0.4 : 0.2),
-                blurRadius: _hovering ? 24 : 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: isEnabled
+                ? [
+                    BoxShadow(
+                      color: AppTheme.lavenderAccent
+                          .withValues(alpha: _hovering ? 0.4 : 0.2),
+                      blurRadius: _hovering ? 24 : 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               if (widget.icon != null) ...[
-                Icon(widget.icon, color: Colors.white, size: 20),
+                Icon(widget.icon,
+                    color: isEnabled
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.3),
+                    size: 20),
                 const SizedBox(width: 8),
               ],
               Text(
                 widget.text,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isEnabled
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.3),
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
