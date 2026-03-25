@@ -76,7 +76,7 @@ class _IntroScreenState extends State<IntroScreen>
                             gradient: LinearGradient(
                               colors: [
                                 AppTheme.lavenderAccent.withValues(alpha: 0.25),
-                                AppTheme.softPurple.withValues(alpha: 0.10),
+                                AppTheme.lavenderAccent.withValues(alpha: 0.10),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,

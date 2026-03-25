@@ -145,7 +145,7 @@ class _StardustBackgroundState extends State<StardustBackground> with SingleTick
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        const Color(0xFF9C27B0).withValues(alpha: (isDark ? 0.08 : 0.0) + (0.02 * _animation.value)),
+                        const Color(0xFF9C27B0).withValues(alpha: isDark ? (0.08 + (0.02 * _animation.value)) : 0.0),
                         const Color(0xFF9C27B0).withValues(alpha: isDark ? 0.02 : 0.0),
                         Colors.transparent,
                       ],
