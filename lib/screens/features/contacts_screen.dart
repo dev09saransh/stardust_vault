@@ -27,9 +27,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AddContactSheet(onAdd: (name, relation) {
+      builder: (sheetContext) => AddContactSheet(onAdd: (name, relation, phone) {
         setState(() {
-          widget.contacts.add({'name': name, 'relation': relation, 'status': 'Pending'});
+          widget.contacts.add({'name': name, 'relation': relation, 'phone': phone, 'status': 'Pending'});
         });
         SuccessAnimationOverlay.show(context);
       }),
@@ -78,6 +78,19 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w500,
                                                   color: Theme.of(context).colorScheme.onSurface)),
+                                          const SizedBox(height: 2),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.phone_outlined, size: 12,
+                                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                                              const SizedBox(width: 4),
+                                              Text(c['phone'] ?? 'N/A',
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Theme.of(context).colorScheme.onSurfaceVariant
+                                                          .withValues(alpha: 0.6))),
+                                            ],
+                                          ),
                                           Text(c['relation']!,
                                               style: TextStyle(
                                                   fontSize: 12,
@@ -139,7 +152,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
           Text('Contacts',
               style: TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w900,
                   color: Theme.of(context).colorScheme.onSurface)),
         ],
       ),

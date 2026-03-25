@@ -52,8 +52,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {'site': 'Amazon', 'username': 'user_shop', 'pass': '••••••••'},
   ];
   final List<Map<String, String>> _contacts = [
-    {'name': 'John Doe', 'relation': 'Brother', 'status': 'Verified'},
-    {'name': 'Jane Smith', 'relation': 'Spouse', 'status': 'Pending'},
+    {'name': 'John Doe', 'relation': 'Brother', 'phone': '+91 98765 43210', 'status': 'Verified'},
+    {'name': 'Jane Smith', 'relation': 'Spouse', 'phone': '+91 91234 56789', 'status': 'Pending'},
   ];
   final List<Map<String, String>> _docs = [
     {'title': 'Will & Testament', 'date': '2025-10-12', 'status': 'Signed'},
@@ -120,9 +120,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AddContactSheet(onAdd: (name, relation) {
+      builder: (sheetContext) => AddContactSheet(onAdd: (name, relation, phone) {
         setState(() {
-          _contacts.add({'name': name, 'relation': relation, 'status': 'Pending'});
+          _contacts.add({'name': name, 'relation': relation, 'phone': phone, 'status': 'Pending'});
         });
         SuccessAnimationOverlay.show(context);
       }),
