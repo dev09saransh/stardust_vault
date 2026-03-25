@@ -771,49 +771,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            alignment: WrapAlignment.start,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 20,
-            runSpacing: 20,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FadeInDown(
-                    duration: const Duration(milliseconds: 600),
-                    child: GlowingText(welcomeMsg,
-                        style: TextStyle(
-                            fontSize: isWide ? 48 : 32,
-                            fontWeight: FontWeight.w900,
-                            color: Theme.of(context).colorScheme.onSurface)),
-                  ),
-                  const SizedBox(height: 8),
-                  FadeInDown(
-                    duration: const Duration(milliseconds: 600),
-                    delay: const Duration(milliseconds: 100),
-                    child: Container(
-                      constraints: BoxConstraints(maxWidth: isWide ? 600 : MediaQuery.of(context).size.width - 40),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FadeInDown(
+                      duration: const Duration(milliseconds: 600),
+                      child: GlowingText(welcomeMsg,
+                          style: TextStyle(
+                              fontSize: isWide ? 48 : 32,
+                              fontWeight: FontWeight.w900,
+                              color: Theme.of(context).colorScheme.onSurface)),
+                    ),
+                    const SizedBox(height: 8),
+                    FadeInDown(
+                      duration: const Duration(milliseconds: 600),
+                      delay: const Duration(milliseconds: 100),
                       child: Text('Monitor your global asset health and security status.',
+                          softWrap: true,
                           style: TextStyle(
                               fontSize: 15,
                               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              if (!widget.isGuest && widget.isLogin)
-                FadeInRight(
-                  duration: const Duration(milliseconds: 600),
-                  child: _actionButton(
-                    label: 'Start Tour',
-                    icon: Icons.play_circle_outline_rounded,
-                    onPressed: () => setState(() => _showTour = true),
-                    isPrimary: false,
+              if (isWide && !widget.isGuest && widget.isLogin)
+                Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: FadeInRight(
+                    duration: const Duration(milliseconds: 600),
+                    child: _actionButton(
+                      label: 'Start Tour',
+                      icon: Icons.play_circle_outline_rounded,
+                      onPressed: () => setState(() => _showTour = true),
+                      isPrimary: false,
+                    ),
                   ),
                 ),
             ],
           ),
+          if (!isWide && !widget.isGuest && widget.isLogin) ...[
+            const SizedBox(height: 24),
+            FadeInUp(
+              duration: const Duration(milliseconds: 600),
+              child: _actionButton(
+                label: 'Start Tour',
+                icon: Icons.play_circle_outline_rounded,
+                onPressed: () => setState(() => _showTour = true),
+                isPrimary: false,
+                width: 200,
+              ),
+            ),
+          ],
           SizedBox(height: isWide ? 48 : 32),
           FadeInUp(
             duration: const Duration(milliseconds: 800),
