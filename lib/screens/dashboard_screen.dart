@@ -19,7 +19,6 @@ import '../widgets/add_contact_sheet.dart';
 import '../widgets/add_doc_sheet.dart';
 import '../widgets/success_animation.dart';
 import '../widgets/login_prompt.dart';
-import '../widgets/floating_glass_nav.dart';
 
 class DashboardScreen extends StatefulWidget {
   final bool isGuest;
@@ -195,7 +194,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             if (_showTour)
               GuidedTour(
                 onStepChange: (index) {
-                  final targetIndex = [0, 1, 2, 3, 4, 5, 6][index];
+                  final targetIndex = [
+                    0, // Overview
+                    1, // Assets
+                    2, // Insurance
+                    3, // Passwords
+                    4, // Legal Center
+                    5, // Contacts
+                    6, // Security Log
+                  ][index];
                   setState(() => _selectedIndex = targetIndex);
                 },
                 steps: [
@@ -249,20 +256,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: !isWide ? FloatingGlassNav(
-        currentIndex: _selectedIndex == 0 ? 0 : (_selectedIndex == 2 ? 1 : (_selectedIndex == 6 ? 3 : 0)),
-        onTap: (index) {
-          if (index == 0) {
-            setState(() => _selectedIndex = 0);
-          } else if (index == 1) {
-            setState(() => _selectedIndex = 2); // Assets
-          } else if (index == 2) {
-            setState(() => _showDocumentCatalog = true);
-          } else if (index == 3) {
-            setState(() => _selectedIndex = 6); // Settings
-          }
-        },
-      ) : null,
     );
   }
 
@@ -765,12 +758,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       SecurityLogScreen(),
     ];
 
-    return Column(
-      children: [
-        Expanded(child: screens[_selectedIndex]),
-        if (!isWide) const SizedBox(height: 80),
-      ],
-    );
+    return screens[_selectedIndex];
   }
 
   Widget _dashboardHome(BuildContext context, bool isWide) {

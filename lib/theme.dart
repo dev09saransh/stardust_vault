@@ -13,16 +13,6 @@ class AppTheme {
   static const Color surfaceGlass = Color(0x14FFFFFF);     
   static const Color borderSubtle = Color(0x1AFFFFFF);     
 
-  // Iridescent / Silver-Mist Palette for card borders
-  static const List<Color> iridescentColors = [
-    Color(0xFF2196F3), // Primary Blue
-    Color(0xFFA2D2FF), // Sky Blue
-    Color(0xFFB8C0FF), // Lavender
-    Color(0xFFC8B6FF), // Soft Purple
-    Color(0xFFE7C6FF), // Pale Pink
-    Color(0xFF2196F3), // Back to Blue
-  ];
-
   static const LinearGradient buttonGradient = LinearGradient(
     colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
     begin: Alignment.centerLeft,
@@ -44,15 +34,9 @@ class AppTheme {
         onSurfaceVariant: silverMist,
       ),
       textTheme: GoogleFonts.outfitTextTheme(baseTheme.textTheme).copyWith(
-        displayLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displayLarge, fontWeight: FontWeight.w900, color: platinum),
-        displayMedium: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displayMedium, fontWeight: FontWeight.w900, color: platinum),
-        displaySmall: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displaySmall, fontWeight: FontWeight.w900, color: platinum),
-        headlineLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.headlineLarge, fontWeight: FontWeight.w900, color: platinum),
-        headlineMedium: GoogleFonts.outfit(textStyle: baseTheme.textTheme.headlineMedium, fontWeight: FontWeight.bold, color: platinum),
-        titleLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.titleLarge, fontWeight: FontWeight.bold, color: platinum),
-        bodyLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyLarge, fontWeight: FontWeight.w700, color: platinum),
-        bodyMedium: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyMedium, fontWeight: FontWeight.w700, color: silverMist),
-        bodySmall: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodySmall, fontWeight: FontWeight.w700, color: silverMist),
+        displayLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displayLarge, fontWeight: FontWeight.bold, color: platinum),
+        bodyLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyLarge, fontWeight: FontWeight.bold, color: platinum),
+        bodyMedium: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyMedium, fontWeight: FontWeight.bold, color: silverMist),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -64,40 +48,30 @@ class AppTheme {
 
   static ThemeData get lightTheme {
     final baseTheme = ThemeData.light();
-    const Color lightBluePrimary = Color(0xFF2196F3);
-    const Color mistBg = Color(0xFFF0F4FF); // Custom Stardust Mist tint
-    const Color extremeDark = Color(0xFF0D0D1A); // Darker black for text classiness
-
     return ThemeData(
       brightness: Brightness.light,
-      scaffoldBackgroundColor: mistBg,
-      primaryColor: lightBluePrimary,
+      scaffoldBackgroundColor: Colors.white,
+      primaryColor: const Color(0xFF2196F3),
       colorScheme: const ColorScheme.light(
-        primary: lightBluePrimary,
+        primary: Color(0xFF2196F3),
         secondary: Color(0xFF9C27B0),
         surface: Colors.white,
         onPrimary: Colors.white,
-        onSurface: extremeDark,
-        onSurfaceVariant: Color(0xFF4A4A6A),
-        surfaceTint: Colors.white,
+        onSurface: Colors.black, // Extreme black for mobile readability
+        onSurfaceVariant: Color(0xFF333333),
       ),
       textTheme: GoogleFonts.outfitTextTheme(baseTheme.textTheme).copyWith(
-        displayLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displayLarge, fontWeight: FontWeight.w900, color: extremeDark),
-        displayMedium: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displayMedium, fontWeight: FontWeight.w900, color: extremeDark),
-        displaySmall: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displaySmall, fontWeight: FontWeight.w900, color: extremeDark),
-        headlineLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.headlineLarge, fontWeight: FontWeight.w900, color: extremeDark),
-        headlineMedium: GoogleFonts.outfit(textStyle: baseTheme.textTheme.headlineMedium, fontWeight: FontWeight.bold, color: extremeDark),
-        titleLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.titleLarge, fontWeight: FontWeight.bold, color: extremeDark),
-        titleMedium: GoogleFonts.outfit(textStyle: baseTheme.textTheme.titleMedium, fontWeight: FontWeight.bold, color: extremeDark),
-        bodyLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyLarge, fontWeight: FontWeight.w700, color: extremeDark),
-        bodyMedium: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyMedium, fontWeight: FontWeight.w700, color: Color(0xFF4A4A6A)),
-        bodySmall: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodySmall, fontWeight: FontWeight.w700, color: Color(0xFF4A4A6A)),
-        labelLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.labelLarge, fontWeight: FontWeight.bold, color: extremeDark),
+        displayLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.displayLarge, fontWeight: FontWeight.bold, color: Colors.black),
+        headlineLarge: GoogleFonts.outfit(textStyle: baseTheme.textTheme.headlineLarge, fontWeight: FontWeight.w900, color: Colors.black),
+        bodyLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyLarge, fontWeight: FontWeight.bold, color: Colors.black),
+        bodyMedium: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodyMedium, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+        bodySmall: GoogleFonts.inter(textStyle: baseTheme.textTheme.bodySmall, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+        labelLarge: GoogleFonts.inter(textStyle: baseTheme.textTheme.labelLarge, fontWeight: FontWeight.bold, color: Colors.black),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: extremeDark),
+        iconTheme: IconThemeData(color: Colors.black),
       ),
     );
   }

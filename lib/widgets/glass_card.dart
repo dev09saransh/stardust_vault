@@ -71,7 +71,7 @@ class _GlassCardState extends State<GlassCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(widget.borderRadius),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: isDark ? 20 : 40, sigmaY: isDark ? 20 : 40),
+            filter: ImageFilter.blur(sigmaX: isDark ? 20 : 30, sigmaY: isDark ? 20 : 30),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 400),
               padding: widget.padding ?? const EdgeInsets.all(20),
@@ -79,40 +79,24 @@ class _GlassCardState extends State<GlassCard> {
                 color: bgColor,
                 borderRadius: BorderRadius.circular(widget.borderRadius),
                 border: Border.all(
-                  color: isDark ? borderColor : borderColor.withValues(alpha: 0.1),
+                  color: borderColor,
                   width: _isHovered ? 1.5 : 1.0,
                 ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark 
+                    ? [
+                        Colors.white.withValues(alpha: 0.05),
+                        Colors.white.withValues(alpha: 0.01),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.4),
+                        Colors.white.withValues(alpha: 0.1),
+                      ],
+                ),
               ),
-              child: Stack(
-                children: [
-                  // ─── Iridescent Border Effect ───
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(widget.borderRadius),
-                        border: Border.all(
-                          color: _isHovered 
-                              ? Colors.transparent 
-                              : (isDark ? colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent),
-                          width: 1,
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            colorScheme.primary.withValues(alpha: _isHovered ? 0.5 : 0.2),
-                            colorScheme.secondary.withValues(alpha: _isHovered ? 0.3 : 0.1),
-                            const Color(0xFFA2D2FF).withValues(alpha: _isHovered ? 0.4 : 0.15),
-                            colorScheme.primary.withValues(alpha: _isHovered ? 0.5 : 0.2),
-                          ],
-                          stops: const [0.0, 0.4, 0.6, 1.0],
-                        ),
-                      ),
-                    ),
-                  ),
-                  widget.child,
-                ],
-              ),
+              child: widget.child,
             ),
           ),
         ),
