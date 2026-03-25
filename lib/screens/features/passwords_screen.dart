@@ -51,68 +51,69 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
         onDrop: _onFileDropped,
         child: StardustBackground(
           child: SafeArea(
-          child: Column(
-            children: [
-              _header(context),
-              Expanded(
-                child: widget.passwords.isEmpty
-                    ? _emptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: widget.passwords.length,
-                        itemBuilder: (context, index) {
-                          final p = widget.passwords[index];
-                          return FadeInUp(
-                            duration: const Duration(milliseconds: 400),
-                            delay: Duration(milliseconds: index * 100),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: GlassCard(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.primary
-                                            .withValues(alpha: 0.1),
-                                        shape: BoxShape.circle,
+            child: Column(
+              children: [
+                _header(context),
+                Expanded(
+                  child: widget.passwords.isEmpty
+                      ? _emptyState()
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(20),
+                          itemCount: widget.passwords.length,
+                          itemBuilder: (context, index) {
+                            final p = widget.passwords[index];
+                            return FadeInUp(
+                              duration: const Duration(milliseconds: 400),
+                              delay: Duration(milliseconds: index * 100),
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: GlassCard(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.primary
+                                              .withValues(alpha: 0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.lock_person_rounded,
+                                          color: Theme.of(context).colorScheme.primary,
+                                          size: 24,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        Icons.lock_person_rounded,
-                                        color: Theme.of(context).colorScheme.primary,
-                                        size: 24,
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(p['site']!,
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Theme.of(context).colorScheme.onSurface)),
+                                            Text(p['username']!,
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Theme.of(context).colorScheme.onSurfaceVariant
+                                                        .withValues(alpha: 0.5))),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(p['site']!,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Theme.of(context).colorScheme.onSurface)),
-                                          Text(p['username']!,
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Theme.of(context).colorScheme.onSurfaceVariant
-                                                      .withValues(alpha: 0.5))),
-                                        ],
-                                      ),
-                                    ),
-                                    Icon(Icons.visibility_off_outlined,
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-                                  ],
+                                      Icon(Icons.visibility_off_outlined,
+                                          color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -131,7 +132,7 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
+                color: Theme.of(context).colorScheme.onSurface),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: 8),
