@@ -47,16 +47,20 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
       LoginRequiredPrompt.show(context);
       return;
     }
+    final currentCategory = _categories[_tabController.index];
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AddAssetSheet(onAdd: (name, value, type) {
-        setState(() {
-          widget.assets.add({'name': name, 'value': value, 'type': type});
-        });
-        SuccessAnimationOverlay.show(context);
-      }),
+      builder: (sheetContext) => AddAssetSheet(
+        category: currentCategory,
+        onAdd: (name, value, type) {
+          setState(() {
+            widget.assets.add({'name': name, 'value': value, 'type': type});
+          });
+          SuccessAnimationOverlay.show(context);
+        },
+      ),
     );
   }
 
@@ -134,12 +138,12 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
   }
 
   Widget _buildAssetList(String category) {
-    // For now, filtering is simulated or based on 'type' if it matches
     final filtered = widget.assets.where((a) {
       if (category == 'Banking' && a['type'] == 'Digital') return true;
       if (category == 'Real Estate' && a['type'] == 'Physical') return true;
+      if (category == 'Cards' && a['type'] == 'Card') return true;
       // Default to showing some items if it's the first tab for demo
-      return category == _categories[0]; 
+      return category == _categories[0] && a['type'] != 'Card'; 
     }).toList();
 
     if (filtered.isEmpty) return _emptyState();
