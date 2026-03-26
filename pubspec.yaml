@@ -38,7 +38,7 @@ dependencies:
   animate_do: ^4.2.0
   image_picker: ^1.2.1
   desktop_drop: ^0.7.0
-  google_mlkit_document_scanner: ^0.4.1
+  cunning_document_scanner: ^1.4.0
 
 dev_dependencies:
   flutter_test:

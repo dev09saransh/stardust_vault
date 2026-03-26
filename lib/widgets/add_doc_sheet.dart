@@ -5,7 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
+import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import '../theme.dart';
 
 class AddDocSheet extends StatefulWidget {
@@ -43,41 +43,55 @@ class _AddDocSheetState extends State<AddDocSheet> {
     }
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    // Professional Scanner for Mobile Camera
-    if (source == ImageSource.camera && !kIsWeb) {
-      try {
-        final documentScanner = DocumentScanner(
-          options: DocumentScannerOptions(
-            documentFormats: {DocumentFormat.jpeg},
-            mode: ScannerMode.full,
-            isGalleryImport: true,
-          ),
-        );
-        
-        final result = await documentScanner.scanDocument();
-        await documentScanner.close();
-
-        final images = result.images;
-        if (images != null && images.isNotEmpty) {
-          setState(() {
-            _pickedFile = XFile(images.first);
-          });
-        }
-        return;
-      } catch (e) {
-        debugPrint('ML Kit Scanner Error: $e');
-        // Fallback to standard picker if scanner fails
-      }
+  /// Launch the native document scanner (edge detection + auto-crop)
+  Future<void> _scanDocument() async {
+    if (kIsWeb) {
+      // Web doesn't support native scanning — fall back to file upload
+      _pickFromGallery();
+      return;
     }
 
-    // Standard Picker for Gallery or Web
+    try {
+      // cunning_document_scanner: Android + iOS, edge detection, auto-crop
+      final List<String>? imagesPath = await CunningDocumentScanner.getPictures(
+        noOfPages: 1,
+        isGalleryImportAllowed: true,
+      );
+
+      if (imagesPath != null && imagesPath.isNotEmpty) {
+        setState(() {
+          _pickedFile = XFile(imagesPath.first);
+        });
+        // Auto-populate title if empty
+        if (_titleController.text.isEmpty) {
+          _titleController.text = '${widget.type} Scan ${DateTime.now().day}/${DateTime.now().month}';
+        }
+        return;
+      }
+    } catch (e) {
+      debugPrint('Document Scanner Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Scanner unavailable. Please use file upload instead.'),
+            action: SnackBarAction(
+              label: 'Upload',
+              onPressed: _pickFromGallery,
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Pick an image from the gallery (works everywhere)
+  Future<void> _pickFromGallery() async {
     try {
       final XFile? image = await _picker.pickImage(
-        source: source,
-        maxWidth: 1000,
-        maxHeight: 1000,
-        imageQuality: 85,
+        source: ImageSource.gallery,
+        maxWidth: 1800,
+        maxHeight: 1800,
+        imageQuality: 90,
       );
       if (image != null) {
         setState(() {
@@ -88,7 +102,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
       debugPrint('Error picking image: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error accessing ${source == ImageSource.camera ? 'camera' : 'gallery'}')),
+          const SnackBar(content: Text('Error accessing gallery')),
         );
       }
     }
@@ -238,7 +252,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
           child: _optionButton(
             icon: Icons.document_scanner_rounded,
             label: 'Scan Document',
-            onTap: () => _pickImage(ImageSource.camera),
+            onTap: _scanDocument,
           ),
         ),
         const SizedBox(width: AppSpacing.medium),
@@ -246,7 +260,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
           child: _optionButton(
             icon: Icons.upload_file_rounded,
             label: 'Upload File',
-            onTap: () => _pickImage(ImageSource.gallery),
+            onTap: _pickFromGallery,
           ),
         ),
       ],
