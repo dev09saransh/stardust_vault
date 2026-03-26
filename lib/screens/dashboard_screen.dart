@@ -271,11 +271,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {'label': 'Settings', 'icon': Icons.settings_outlined, 'color': Colors.grey},
     ];
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark 
         ? Colors.black.withValues(alpha: 0.4) 
         : Colors.white.withValues(alpha: 0.2);
-    final textColor = Theme.of(context).colorScheme.onSurface;
+    final textColor = theme.colorScheme.onSurface;
 
     return Positioned.fill(
       child: FadeIn(
@@ -635,7 +636,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _appBar(bool isWide) {
-    final theme = Theme.of(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isVeryNarrow = screenWidth < 450;
     final horizontalPadding = isVeryNarrow ? AppSpacing.medium : AppSpacing.large;
