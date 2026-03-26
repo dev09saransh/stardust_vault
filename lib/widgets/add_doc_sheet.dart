@@ -5,6 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:google_mlkit_document_scanner/google_mlkit_document_scanner.dart';
 import '../theme.dart';
 
 class AddDocSheet extends StatefulWidget {
@@ -43,6 +44,34 @@ class _AddDocSheetState extends State<AddDocSheet> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
+    // Professional Scanner for Mobile Camera
+    if (source == ImageSource.camera && !kIsWeb) {
+      try {
+        final documentScanner = DocumentScanner(
+          options: DocumentScannerOptions(
+            documentFormats: {DocumentFormat.jpeg},
+            mode: ScannerMode.full,
+            isGalleryImport: true,
+          ),
+        );
+        
+        final result = await documentScanner.scanDocument();
+        await documentScanner.close();
+
+        final images = result.images;
+        if (images != null && images.isNotEmpty) {
+          setState(() {
+            _pickedFile = XFile(images.first);
+          });
+        }
+        return;
+      } catch (e) {
+        debugPrint('ML Kit Scanner Error: $e');
+        // Fallback to standard picker if scanner fails
+      }
+    }
+
+    // Standard Picker for Gallery or Web
     try {
       final XFile? image = await _picker.pickImage(
         source: source,

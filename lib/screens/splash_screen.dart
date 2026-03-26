@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/stardust_background.dart';
-import '../widgets/glowing_text.dart';
 import '../theme.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -86,10 +85,10 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 40),
-                  GlowingText('Stardust Vault',
+                  Text('Stardust Vault',
                       style: TextStyle(
                           fontSize: 40,
-                          fontWeight: FontWeight.w300,
+                          fontWeight: FontWeight.bold,
                           color: Theme.of(context).colorScheme.onSurface,
                           letterSpacing: 6)),
                   const SizedBox(height: 12),

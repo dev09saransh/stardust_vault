@@ -11,7 +11,6 @@ import 'features/contacts_screen.dart';
 import 'features/legal_center_screen.dart';
 import 'features/security_log_screen.dart';
 import 'package:animate_do/animate_do.dart';
-import '../widgets/glowing_text.dart';
 import '../widgets/intro_modal.dart';
 import '../widgets/guided_tour.dart';
 import '../widgets/add_asset_sheet.dart';
@@ -261,14 +260,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _catalogOverlay() {
     final categories = [
-      {'label': 'Real Estate', 'icon': Icons.home_work_outlined, 'color': Colors.blue},
-      {'label': 'Bank Accounts', 'icon': Icons.account_balance_outlined, 'color': Colors.green},
-      {'label': 'Investments', 'icon': Icons.trending_up_rounded, 'color': Colors.orange},
-      {'label': 'Insurance', 'icon': Icons.security_outlined, 'color': Colors.red},
-      {'label': 'Passwords', 'icon': Icons.password_outlined, 'color': Colors.teal},
-      {'label': 'Legal Docs', 'icon': Icons.gavel_outlined, 'color': Colors.purple},
-      {'label': 'Contacts', 'icon': Icons.people_outline, 'color': Colors.indigo},
-      {'label': 'Settings', 'icon': Icons.settings_outlined, 'color': Colors.grey},
+      {'label': 'Real Estate', 'icon': Icons.home_work_outlined, 'color': Colors.blue, 'index': 1},
+      {'label': 'Bank Accounts', 'icon': Icons.account_balance_outlined, 'color': Colors.green, 'index': 1},
+      {'label': 'Investments', 'icon': Icons.trending_up_rounded, 'color': Colors.orange, 'index': 1},
+      {'label': 'Insurance', 'icon': Icons.security_outlined, 'color': Colors.red, 'index': 2},
+      {'label': 'Passwords', 'icon': Icons.password_outlined, 'color': Colors.teal, 'index': 3},
+      {'label': 'Legal Docs', 'icon': Icons.gavel_outlined, 'color': Colors.purple, 'index': 4},
+      {'label': 'Contacts', 'icon': Icons.people_outline, 'color': Colors.indigo, 'index': 5},
     ];
 
     final theme = Theme.of(context);
@@ -318,7 +316,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               return FadeInUp(
                                 delay: Duration(milliseconds: 150 + (index * 50)),
                                 child: InkWell(
-                                  onTap: () => setState(() => _showCatalog = false),
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedIndex = cat['index'] as int;
+                                      _showCatalog = false;
+                                    });
+                                  },
                                   borderRadius: BorderRadius.circular(24),
                                   child: GlassCard(
                                     width: 180,
@@ -793,8 +796,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     FadeInDown(
                       duration: const Duration(milliseconds: 600),
-                      child: GlowingText(welcomeMsg,
-                          style: isWide ? theme.textTheme.displayLarge : theme.textTheme.headlineLarge),
+                      child: Text(welcomeMsg,
+                          style: (isWide ? theme.textTheme.displayLarge : theme.textTheme.headlineLarge)
+                              ?.copyWith(fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: AppSpacing.small),
                     FadeInDown(

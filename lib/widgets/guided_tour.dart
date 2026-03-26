@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import '../theme.dart';
-import 'glowing_text.dart';
 
 class GuidedTour extends StatefulWidget {
   final List<TourStep> steps;
@@ -96,7 +95,7 @@ class _GuidedTourState extends State<GuidedTour> {
                       ),
                       const SizedBox(height: 20),
                     ],
-                    GlowingText(
+                    Text(
                       step.title,
                       style: TextStyle(
                         fontSize: 28,
