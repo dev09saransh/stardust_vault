@@ -96,7 +96,7 @@ class SettingsScreen extends StatelessWidget {
                   style: theme.textTheme.bodyLarge),
             ),
             if (toggle)
-              Switch(value: true, onChanged: (_) {}, activeThumbImage: null, activeColor: theme.colorScheme.primary)
+              Switch(value: true, onChanged: (_) {}, activeThumbImage: null, activeThumbColor: theme.colorScheme.primary)
             else if (value.isNotEmpty)
               Text(value,
                   style: theme.textTheme.bodySmall),

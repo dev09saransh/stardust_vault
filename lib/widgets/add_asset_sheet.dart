@@ -35,7 +35,7 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
           AppSpacing.medium,
           100,
           AppSpacing.medium,
-          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+          MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xlarge),
       padding: const EdgeInsets.all(AppSpacing.large),
       child: SingleChildScrollView(
         child: Column(
