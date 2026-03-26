@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../theme.dart';
 
 class GlassCard extends StatefulWidget {
   final Widget child;
@@ -39,7 +40,7 @@ class _GlassCardState extends State<GlassCard> {
     
     final Color borderColor = isDark
         ? colorScheme.primary.withValues(alpha: _isHovered ? 0.4 : 0.15)
-        : colorScheme.primary.withValues(alpha: _isHovered ? 0.3 : 0.4); // Higher border visibility in light mode
+        : colorScheme.primary.withValues(alpha: _isHovered ? 0.3 : 0.4); 
 
     Widget card = AnimatedScale(
       scale: _isHovered ? 1.02 : 1.0,
@@ -55,7 +56,7 @@ class _GlassCardState extends State<GlassCard> {
             BoxShadow(
               color: isDark 
                   ? colorScheme.primary.withValues(alpha: _isHovered ? 0.15 : 0.05)
-                  : Colors.black.withValues(alpha: _isHovered ? 0.08 : 0.04), // Cleaner shadow for light mode
+                  : Colors.black.withValues(alpha: _isHovered ? 0.08 : 0.04),
               blurRadius: _isHovered ? 40 : 20,
               spreadRadius: _isHovered ? 2 : 0,
               offset: Offset(0, _isHovered ? 12 : 6),
@@ -71,10 +72,10 @@ class _GlassCardState extends State<GlassCard> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(widget.borderRadius),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: isDark ? 20 : 10, sigmaY: isDark ? 20 : 10), // Less blur in light mode for clarity
+            filter: ImageFilter.blur(sigmaX: isDark ? 20 : 10, sigmaY: isDark ? 20 : 10),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 400),
-              padding: widget.padding ?? const EdgeInsets.all(20),
+              padding: widget.padding ?? const EdgeInsets.all(AppSpacing.medium),
               decoration: BoxDecoration(
                 color: bgColor,
                 borderRadius: BorderRadius.circular(widget.borderRadius),
@@ -82,7 +83,7 @@ class _GlassCardState extends State<GlassCard> {
                   color: borderColor,
                   width: _isHovered ? 1.5 : 1.0,
                 ),
-                gradient: !isDark ? null : LinearGradient( // Remove gradient in light mode for solid white look
+                gradient: !isDark ? null : LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [

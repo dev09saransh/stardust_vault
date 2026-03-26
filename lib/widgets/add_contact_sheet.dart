@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'glass_card.dart';
 import 'gradient_button.dart';
+import '../theme.dart';
 
 class AddContactSheet extends StatefulWidget {
   final Function(String, String, String) onAdd;
@@ -17,24 +18,22 @@ class _AddContactSheetState extends State<AddContactSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GlassCard(
-      margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 100),
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.fromLTRB(
+          AppSpacing.medium,
+          100,
+          AppSpacing.medium,
+          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+      padding: const EdgeInsets.all(AppSpacing.large),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Add Trusted Contact',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Theme.of(context).colorScheme.onSurface)),
-            const SizedBox(height: 24),
+                style: theme.textTheme.headlineMedium),
+            const SizedBox(height: AppSpacing.large),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
@@ -42,7 +41,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
                 hintText: 'e.g. John Doe',
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.medium),
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
@@ -52,7 +51,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
                 prefixIcon: Icon(Icons.phone_outlined),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.medium),
             TextField(
               controller: _relController,
               decoration: const InputDecoration(
@@ -60,7 +59,7 @@ class _AddContactSheetState extends State<AddContactSheet> {
                 hintText: 'e.g. Spouse, Brother, Parent',
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xlarge),
             GradientButton(
               text: 'Add Contact',
               onPressed: () {
@@ -70,7 +69,6 @@ class _AddContactSheetState extends State<AddContactSheet> {
                 }
               },
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),

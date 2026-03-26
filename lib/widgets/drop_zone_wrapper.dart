@@ -4,6 +4,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:ui' as ui;
 import 'package:animate_do/animate_do.dart';
+import '../theme.dart';
 
 class DropZoneWrapper extends StatefulWidget {
   final Widget child;
@@ -37,6 +38,7 @@ class _DropZoneWrapperState extends State<DropZoneWrapper> {
   @override
   Widget build(BuildContext context) {
     final bool isComputer = _isComputer(context);
+    final theme = Theme.of(context);
 
     return DropTarget(
       onDragEntered: (details) => setState(() => _isHovering = true),
@@ -57,23 +59,21 @@ class _DropZoneWrapperState extends State<DropZoneWrapper> {
                 child: FadeIn(
                   duration: const Duration(seconds: 2),
                   child: Opacity(
-                    opacity: 0.08, // Slightly increased for better visibility
+                    opacity: 0.08, 
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.cloud_upload_outlined,
                           size: 200,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: theme.colorScheme.primary,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.medium),
                         Text(
                           'Drag & Drop Zone',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            color: theme.colorScheme.primary,
                             letterSpacing: 2,
-                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       ],
@@ -90,48 +90,46 @@ class _DropZoneWrapperState extends State<DropZoneWrapper> {
   }
 
   Widget _buildDropOverlay() {
+    final theme = Theme.of(context);
     return Positioned.fill(
       child: FadeIn(
         duration: const Duration(milliseconds: 200),
         child: BackdropFilter(
           filter: ui.ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(AppSpacing.large),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
                         width: 2,
                       ),
                     ),
                     child: Icon(
                       Icons.cloud_upload_outlined,
                       size: 64,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.large),
                   Text(
                     'Drop to Vault',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: theme.colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.small),
                   Text(
                     'Release your files to securely upload them',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                 ],

@@ -5,6 +5,7 @@ import '../../widgets/success_animation.dart';
 import '../../widgets/add_contact_sheet.dart';
 import '../../widgets/login_prompt.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../theme.dart';
 
 class ContactsScreen extends StatefulWidget {
   final List<Map<String, String>> contacts;
@@ -38,6 +39,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: StardustBackground(
         child: SafeArea(
@@ -48,7 +50,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 child: widget.contacts.isEmpty
                     ? _emptyState()
                     : ListView.builder(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(AppSpacing.edge),
                         itemCount: widget.contacts.length,
                         itemBuilder: (context, index) {
                           final c = widget.contacts[index];
@@ -56,52 +58,44 @@ class _ContactsScreenState extends State<ContactsScreen> {
                             duration: const Duration(milliseconds: 400),
                             delay: Duration(milliseconds: index * 100),
                             child: Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.only(bottom: AppSpacing.medium),
                               child: GlassCard(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(AppSpacing.medium),
                                 child: Row(
                                   children: [
                                     CircleAvatar(
                                       radius: 24,
-                                      backgroundColor: Theme.of(context).colorScheme.primary
+                                      backgroundColor: theme.colorScheme.primary
                                           .withValues(alpha: 0.1),
                                       child: Icon(Icons.person_rounded,
-                                          color: Theme.of(context).colorScheme.primary),
+                                          color: theme.colorScheme.primary),
                                     ),
-                                    const SizedBox(width: 16),
+                                    const SizedBox(width: AppSpacing.medium),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(c['name']!,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Theme.of(context).colorScheme.onSurface)),
+                                              style: theme.textTheme.titleLarge),
                                           const SizedBox(height: 2),
                                           Row(
                                             children: [
                                               Icon(Icons.phone_outlined, size: 12,
-                                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                                              const SizedBox(width: 4),
+                                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                                              const SizedBox(width: AppSpacing.tiny),
                                               Text(c['phone'] ?? 'N/A',
-                                                  style: TextStyle(
-                                                      fontSize: 12,
-                                                      color: Theme.of(context).colorScheme.onSurfaceVariant
-                                                          .withValues(alpha: 0.6))),
+                                                  style: theme.textTheme.bodySmall),
                                             ],
                                           ),
                                           Text(c['relation']!,
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Theme.of(context).colorScheme.onSurfaceVariant
-                                                      .withValues(alpha: 0.5))),
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4))),
                                         ],
                                       ),
                                     ),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 4),
+                                          horizontal: AppSpacing.small, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: c['status'] == 'Verified'
                                             ? Colors.green.withValues(alpha: 0.1)
@@ -110,12 +104,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                       ),
                                       child: Text(
                                         c['status']!,
-                                        style: TextStyle(
-                                            fontSize: 11,
+                                        style: theme.textTheme.labelSmall?.copyWith(
                                             color: c['status'] == 'Verified'
                                                 ? Colors.greenAccent
                                                 : Colors.orangeAccent,
-                                            fontWeight: FontWeight.w500),
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ),
                                   ],
@@ -139,38 +132,38 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Widget _header(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.edge),
       child: Row(
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
+                color: theme.colorScheme.onSurface,
+                size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.small),
           Text('Contacts',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).colorScheme.onSurface)),
+              style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge),
         ],
       ),
     );
   }
 
   Widget _emptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.contacts_outlined,
-              size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
+              size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
+          const SizedBox(height: AppSpacing.medium),
           Text('No contacts added',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  fontSize: 16)),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
         ],
       ),
     );

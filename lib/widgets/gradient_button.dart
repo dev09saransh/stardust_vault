@@ -25,6 +25,7 @@ class _GradientButtonState extends State<GradientButton> {
   @override
   Widget build(BuildContext context) {
     final bool isEnabled = widget.onPressed != null;
+    final theme = Theme.of(context);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = isEnabled),
@@ -35,7 +36,7 @@ class _GradientButtonState extends State<GradientButton> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: widget.width ?? double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.medium),
           decoration: BoxDecoration(
             gradient: isEnabled
                 ? AppTheme.buttonGradient
@@ -69,17 +70,15 @@ class _GradientButtonState extends State<GradientButton> {
                         ? Colors.white
                         : Colors.white.withValues(alpha: 0.3),
                     size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.small),
               ],
               Text(
                 widget.text,
-                style: TextStyle(
+                style: theme.textTheme.labelLarge?.copyWith(
                   color: isEnabled
                       ? Colors.white
                       : Colors.white.withValues(alpha: 0.3),
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.5,
                 ),
               ),
             ],

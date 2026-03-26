@@ -9,6 +9,7 @@ import '../../widgets/drop_zone_wrapper.dart';
 import '../../widgets/add_doc_sheet.dart';
 import '../../widgets/card_benefits_sheet.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../theme.dart';
 
 class AssetsScreen extends StatefulWidget {
   final List<Map<String, String>> assets;
@@ -122,17 +123,20 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
   }
 
   Widget _categoryTabs() {
+    final theme = Theme.of(context);
     return Container(
       height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.small),
       child: TabBar(
         controller: _tabController,
         isScrollable: true,
-        indicatorColor: Theme.of(context).colorScheme.primary,
+        indicatorColor: theme.colorScheme.primary,
         indicatorWeight: 3,
         dividerColor: Colors.transparent,
-        labelColor: Theme.of(context).colorScheme.onSurface,
-        unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+        labelColor: theme.colorScheme.onSurface,
+        unselectedLabelColor: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+        labelStyle: theme.textTheme.titleLarge?.copyWith(fontSize: 16),
+        unselectedLabelStyle: theme.textTheme.titleLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.normal),
         tabs: _categories.map((cat) => Tab(text: cat)).toList(),
       ),
     );
@@ -147,10 +151,11 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
       return category == _categories[0] && a['type'] != 'Card'; 
     }).toList();
 
+    final theme = Theme.of(context);
     if (filtered.isEmpty) return _emptyState();
 
     return ListView.builder(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.edge),
       itemCount: filtered.length,
       itemBuilder: (context, index) {
         final asset = filtered[index];
@@ -160,7 +165,7 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
           duration: const Duration(milliseconds: 400),
           delay: Duration(milliseconds: index * 100),
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: AppSpacing.medium),
             child: GlassCard(
               onTap: isCard ? () {
                 showModalBottomSheet(
@@ -173,48 +178,41 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
                   ),
                 );
               } : null,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.medium),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.medium - 4),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       isCard 
                           ? Icons.credit_card_rounded
                           : (asset['type'] == 'Digital' ? Icons.currency_bitcoin_rounded : Icons.inventory_2_rounded),
-                      color: Theme.of(context).colorScheme.primary,
+                      color: theme.colorScheme.primary,
                       size: 24,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.medium),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(asset['name']!,
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Theme.of(context).colorScheme.onSurface)),
+                            style: theme.textTheme.titleLarge),
+                        const SizedBox(height: 2),
                         Text(isCard ? 'Tap to view benefits' : asset['type']!,
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isCard ? FontWeight.bold : FontWeight.normal,
-                                color: isCard 
-                                    ? Theme.of(context).colorScheme.primary 
-                                    : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6))),
+                            style: isCard 
+                                ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)
+                                : theme.textTheme.bodySmall),
                       ],
                     ),
                   ),
                   Text(asset['value']!,
-                      style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.primary)),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                          color: theme.colorScheme.primary)),
                 ],
               ),
             ),
@@ -225,40 +223,38 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
   }
 
   Widget _header(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return Padding(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      padding: const EdgeInsets.all(AppSpacing.edge),
       child: Row(
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
                 size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.small),
           Text('Assets',
-              style: TextStyle(
-                  fontSize: isMobile ? 22 : 28,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).colorScheme.onSurface)),
+              style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge),
         ],
       ),
     );
   }
 
   Widget _emptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.account_balance_wallet_outlined,
-              size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
+              size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
+          const SizedBox(height: AppSpacing.medium),
           Text('No assets added yet',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  fontSize: 16)),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
         ],
       ),
     );

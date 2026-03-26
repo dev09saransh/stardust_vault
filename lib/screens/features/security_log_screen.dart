@@ -9,6 +9,9 @@ class SecurityLogScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
     final List<Map<String, String>> logs = [
       {'event': 'Account Login', 'id': '192.168.1.1', 'time': '2026-03-24 10:15 AM'},
       {'event': 'Password Changed', 'id': '192.168.1.1', 'time': '2026-03-23 02:45 PM'},
@@ -25,21 +28,18 @@ class SecurityLogScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSpacing.edge),
                 child: Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back_ios_rounded),
                       onPressed: () => Navigator.pop(context),
+                      iconSize: isMobile ? 20 : 24,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.small),
                     Text(
                       'Security Log',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                      style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge,
                     ),
                   ],
                 ),
@@ -48,25 +48,25 @@ class SecurityLogScreen extends StatelessWidget {
                 child: FadeInUp(
                   duration: const Duration(milliseconds: 600),
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.edge),
                     child: GlassCard(
                       padding: const EdgeInsets.all(0),
                       child: Column(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.medium, vertical: AppSpacing.medium),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
-                                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                                  color: theme.dividerColor.withValues(alpha: 0.1),
                                 ),
                               ),
                             ),
                             child: Row(
-                              children: const [
-                                Expanded(flex: 2, child: Text('EVENT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                                Expanded(flex: 2, child: Text('IP ADDRESS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                                Expanded(flex: 2, child: Text('TIMESTAMP', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
+                              children: [
+                                Expanded(flex: 2, child: Text('EVENT', style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold))),
+                                Expanded(flex: 2, child: Text('IP ADDRESS', style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold))),
+                                Expanded(flex: 2, child: Text('TIMESTAMP', style: theme.textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold))),
                               ],
                             ),
                           ),
@@ -81,37 +81,28 @@ class SecurityLogScreen extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final log = logs[index];
                               return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.medium, vertical: AppSpacing.medium),
                                 child: Row(
                                   children: [
                                     Expanded(
                                       flex: 2,
                                       child: Text(
                                         log['event']!,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onSurface,
-                                          fontSize: 14,
-                                        ),
+                                        style: theme.textTheme.bodyMedium,
                                       ),
                                     ),
                                     Expanded(
                                       flex: 2,
                                       child: Text(
                                         log['id']!,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                                          fontSize: 13,
-                                        ),
+                                        style: theme.textTheme.bodySmall,
                                       ),
                                     ),
                                     Expanded(
                                       flex: 2,
                                       child: Text(
                                         log['time']!,
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                                          fontSize: 13,
-                                        ),
+                                        style: theme.textTheme.bodySmall,
                                       ),
                                     ),
                                   ],

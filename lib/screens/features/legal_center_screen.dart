@@ -7,6 +7,7 @@ import '../../widgets/login_prompt.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../widgets/drop_zone_wrapper.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../theme.dart';
 
 class LegalCenterScreen extends StatefulWidget {
   final List<Map<String, String>> docs;
@@ -65,6 +66,7 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: DropZoneWrapper(
         onDrop: _onFileDropped,
@@ -77,7 +79,7 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
                   child: widget.docs.isEmpty
                       ? _emptyState()
                       : ListView.builder(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(AppSpacing.edge),
                           itemCount: widget.docs.length,
                           itemBuilder: (context, index) {
                             final d = widget.docs[index];
@@ -85,44 +87,38 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
                               duration: const Duration(milliseconds: 400),
                               delay: Duration(milliseconds: index * 100),
                               child: Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.only(bottom: AppSpacing.medium),
                                 child: GlassCard(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(AppSpacing.medium),
                                   child: Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(AppSpacing.medium - 4),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary
+                                          color: theme.colorScheme.primary
                                               .withValues(alpha: 0.1),
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
                                           Icons.gavel_rounded,
-                                          color: Theme.of(context).colorScheme.primary,
+                                          color: theme.colorScheme.primary,
                                           size: 24,
                                         ),
                                       ),
-                                      const SizedBox(width: 16),
+                                      const SizedBox(width: AppSpacing.medium),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(d['title']!,
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Theme.of(context).colorScheme.onSurface)),
+                                                style: theme.textTheme.titleLarge),
                                             Text('Added on ${d['date']}',
-                                                style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Theme.of(context).colorScheme.onSurfaceVariant
-                                                        .withValues(alpha: 0.5))),
+                                                style: theme.textTheme.bodySmall),
                                           ],
                                         ),
                                       ),
                                       Icon(Icons.file_download_outlined,
-                                          color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6), size: 20),
                                     ],
                                   ),
                                 ),
@@ -145,40 +141,38 @@ class _LegalCenterScreenState extends State<LegalCenterScreen> {
   }
 
   Widget _header(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return Padding(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      padding: const EdgeInsets.all(AppSpacing.edge),
       child: Row(
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
                 size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.small),
           Text('Legal Center',
-              style: TextStyle(
-                  fontSize: isMobile ? 22 : 28,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).colorScheme.onSurface)),
+              style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge),
         ],
       ),
     );
   }
 
   Widget _emptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.gavel_outlined,
-              size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
+              size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
+          const SizedBox(height: AppSpacing.medium),
           Text('No documents uploaded',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  fontSize: 16)),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
         ],
       ),
     );

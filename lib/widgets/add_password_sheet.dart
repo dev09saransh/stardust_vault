@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'glass_card.dart';
 import 'gradient_button.dart';
+import '../theme.dart';
 
 class AddPasswordSheet extends StatefulWidget {
   final Function(String, String, String) onAdd;
@@ -17,39 +18,37 @@ class _AddPasswordSheetState extends State<AddPasswordSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GlassCard(
-      margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 100),
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.fromLTRB(
+          AppSpacing.medium,
+          100,
+          AppSpacing.medium,
+          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+      padding: const EdgeInsets.all(AppSpacing.large),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Save Password',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface)),
-          const SizedBox(height: 24),
+              style: theme.textTheme.headlineMedium),
+          const SizedBox(height: AppSpacing.large),
           TextField(
             controller: _siteController,
             decoration: const InputDecoration(labelText: 'Website / App'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.medium),
           TextField(
             controller: _userController,
             decoration: const InputDecoration(labelText: 'Username / Email'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.medium),
           TextField(
             controller: _passController,
             obscureText: true,
             decoration: const InputDecoration(labelText: 'Password'),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xlarge),
           GradientButton(
             text: 'Save Password',
             onPressed: () {
@@ -59,7 +58,6 @@ class _AddPasswordSheetState extends State<AddPasswordSheet> {
               }
             },
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );

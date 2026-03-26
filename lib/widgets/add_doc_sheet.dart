@@ -5,6 +5,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import '../theme.dart';
 
 class AddDocSheet extends StatefulWidget {
   final String type;
@@ -66,91 +67,92 @@ class _AddDocSheetState extends State<AddDocSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GlassCard(
-      margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 100),
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+      margin: EdgeInsets.fromLTRB(
+          AppSpacing.medium,
+          100,
+          AppSpacing.medium,
+          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+      padding: const EdgeInsets.all(AppSpacing.large),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.medium - 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(Icons.description_rounded, color: theme.colorScheme.primary),
                 ),
-                child: Icon(Icons.description_rounded, color: Theme.of(context).colorScheme.primary),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Upload ${widget.type} Document',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface)),
-                  Text('Securely vault your files',
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          TextField(
-            controller: _titleController,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              labelText: 'Document Title',
-              hintText: 'e.g. ${widget.type} Policy 2025',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              prefixIcon: const Icon(Icons.edit_note_rounded),
+                const SizedBox(width: AppSpacing.medium),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Upload ${widget.type} Document',
+                          style: theme.textTheme.headlineSmall),
+                      Text('Securely vault your files',
+                          style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 24),
-          if (_pickedFile != null)
-            _imagePreview()
-          else
-            _selectionOptions(),
-          const SizedBox(height: 32),
-          GradientButton(
-            text: 'Vault Document',
-            onPressed: (_pickedFile != null && _titleController.text.isNotEmpty)
-                ? () {
-                    widget.onAdd(_titleController.text);
-                    Navigator.pop(context);
-                  }
-                : null,
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+            const SizedBox(height: AppSpacing.large),
+            TextField(
+              controller: _titleController,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: 'Document Title',
+                hintText: 'e.g. ${widget.type} Policy 2025',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                prefixIcon: const Icon(Icons.edit_note_rounded),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.large),
+            if (_pickedFile != null)
+              _imagePreview()
+            else
+              _selectionOptions(),
+            const SizedBox(height: AppSpacing.xlarge),
+            GradientButton(
+              text: 'Vault Document',
+              onPressed: (_pickedFile != null && _titleController.text.isNotEmpty)
+                  ? () {
+                      widget.onAdd(_titleController.text);
+                      Navigator.pop(context);
+                    }
+                  : null,
+            ),
+            const SizedBox(height: AppSpacing.medium),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: theme.textTheme.bodySmall),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _imagePreview() {
+    final theme = Theme.of(context);
     return FadeIn(
       child: Container(
         height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)),
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+          border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
@@ -177,7 +179,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: AppSpacing.medium),
                 color: Colors.black.withValues(alpha: 0.6),
                 child: Row(
                   children: [
@@ -210,7 +212,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
             onTap: () => _pickImage(ImageSource.camera),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.medium),
         Expanded(
           child: _optionButton(
             icon: Icons.upload_file_rounded,
@@ -223,21 +225,22 @@ class _AddDocSheetState extends State<AddDocSheet> {
   }
 
   Widget _optionButton({required IconData icon, required String label, required VoidCallback onTap}) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.large),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.03),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.03),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1)),
+          border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 12),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+            Icon(icon, size: 32, color: theme.colorScheme.primary),
+            const SizedBox(height: AppSpacing.small),
+            Text(label, style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold)),
           ],
         ),
       ),

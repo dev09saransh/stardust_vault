@@ -296,21 +296,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         const SizedBox(height: 40),
                         FadeInDown(
                           child: Text('Asset Catalog', 
-                            style: TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -1)),
+                            style: theme.textTheme.displayLarge),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.small),
                         FadeInDown(
                           delay: const Duration(milliseconds: 100),
                           child: Text('Explore your vault categories', 
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor.withValues(alpha: 0.6))),
+                            style: theme.textTheme.bodyLarge?.copyWith(color: textColor.withValues(alpha: 0.6))),
                         ),
-                        const SizedBox(height: 60),
+                        const SizedBox(height: AppSpacing.huge),
                         Container(
                           constraints: const BoxConstraints(maxWidth: 900),
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlarge),
                           child: Wrap(
-                            spacing: 24,
-                            runSpacing: 24,
+                            spacing: AppSpacing.large,
+                            runSpacing: AppSpacing.large,
                             alignment: WrapAlignment.center,
                             children: List.generate(categories.length, (index) {
                               final cat = categories[index];
@@ -321,12 +321,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   borderRadius: BorderRadius.circular(24),
                                   child: GlassCard(
                                     width: 180,
-                                    padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xlarge, horizontal: AppSpacing.medium),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.all(16),
+                                          padding: const EdgeInsets.all(AppSpacing.medium),
                                           decoration: BoxDecoration(
                                             color: (cat['color'] as Color).withValues(alpha: 0.1),
                                             shape: BoxShape.circle,
@@ -336,9 +336,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             color: cat['color'] as Color, 
                                             size: 32),
                                         ),
-                                        const SizedBox(height: 20),
+                                        const SizedBox(height: AppSpacing.medium),
                                         Text(cat['label'] as String, 
-                                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: textColor)),
+                                          style: theme.textTheme.titleLarge),
                                       ],
                                     ),
                                   ),
@@ -347,7 +347,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             }),
                           ),
                         ),
-                        const SizedBox(height: 60),
+                        const SizedBox(height: AppSpacing.huge),
                         FadeInUp(
                           delay: const Duration(milliseconds: 800),
                           child: _actionButton(
@@ -382,11 +382,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {'label': 'Others', 'icon': Icons.more_horiz_rounded, 'color': Colors.grey},
     ];
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark 
         ? Colors.black.withValues(alpha: 0.4) 
         : Colors.white.withValues(alpha: 0.2);
-    final textColor = Theme.of(context).colorScheme.onSurface;
+    final textColor = theme.colorScheme.onSurface;
 
     return Positioned.fill(
       child: FadeIn(
@@ -401,33 +402,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: GestureDetector(
                   onTap: () {},
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    padding: const EdgeInsets.all(AppSpacing.edge),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const SizedBox(height: 60),
+                        const SizedBox(height: AppSpacing.huge),
                         FadeInDown(
                           child: Text('Select Document Type', 
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)),
+                            style: theme.textTheme.headlineLarge),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.small),
                         FadeInDown(
                           delay: const Duration(milliseconds: 100),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlarge),
                             child: Text('What type of document would you like to scan or upload?', 
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: textColor.withValues(alpha: 0.6))),
+                              style: theme.textTheme.bodyLarge?.copyWith(color: textColor.withValues(alpha: 0.6))),
                           ),
                         ),
-                        const SizedBox(height: 60),
+                        const SizedBox(height: AppSpacing.huge),
                         Container(
                           constraints: const BoxConstraints(maxWidth: 900),
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlarge),
                           child: Wrap(
-                            spacing: 24,
-                            runSpacing: 24,
+                            spacing: AppSpacing.large,
+                            runSpacing: AppSpacing.large,
                             alignment: WrapAlignment.center,
                             children: List.generate(docTypes.length, (index) {
                               final type = docTypes[index];
@@ -441,12 +442,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   borderRadius: BorderRadius.circular(24),
                                   child: GlassCard(
                                     width: 180,
-                                    padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xlarge, horizontal: AppSpacing.medium),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.all(16),
+                                          padding: const EdgeInsets.all(AppSpacing.medium),
                                           decoration: BoxDecoration(
                                             color: (type['color'] as Color).withValues(alpha: 0.1),
                                             shape: BoxShape.circle,
@@ -456,9 +457,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             color: type['color'] as Color, 
                                             size: 32),
                                         ),
-                                        const SizedBox(height: 20),
+                                        const SizedBox(height: AppSpacing.medium),
                                         Text(type['label'] as String, 
-                                          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: textColor)),
+                                          style: theme.textTheme.titleLarge),
                                       ],
                                     ),
                                   ),
@@ -467,7 +468,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             }),
                           ),
                         ),
-                        const SizedBox(height: 60),
+                        const SizedBox(height: AppSpacing.huge),
                         FadeInUp(
                           delay: const Duration(milliseconds: 800),
                           child: _actionButton(
@@ -477,7 +478,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             isPrimary: true,
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: AppSpacing.huge),
                       ],
                     ),
                   ),
@@ -509,27 +510,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _sidebarContent() {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        const SizedBox(height: 40),
+        const SizedBox(height: AppSpacing.huge),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large),
           child: Row(
             children: [
               _logoIcon(),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.medium),
               Text('STARDUST',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1.5,
-                      color: Theme.of(context).colorScheme.onSurface)),
+                  style: theme.textTheme.titleLarge?.copyWith(letterSpacing: 2)),
             ],
           ),
         ),
-        const SizedBox(height: 48),
+        const SizedBox(height: AppSpacing.huge),
         _sectionLabel('CORE VAULT'),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.medium),
         Expanded(
           child: ListView.builder(
             padding: EdgeInsets.zero,
@@ -585,16 +583,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _sectionLabel(String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xlarge),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             letterSpacing: 1.5,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -637,11 +635,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _appBar(bool isWide) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isVeryNarrow = screenWidth < 450;
+    final horizontalPadding = isVeryNarrow ? AppSpacing.medium : AppSpacing.large;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(isVeryNarrow ? 12 : 24, 16, isVeryNarrow ? 12 : 24, 16),
+      padding: EdgeInsets.fromLTRB(horizontalPadding, AppSpacing.medium, horizontalPadding, AppSpacing.medium),
       child: Row(
         children: [
           if (!isWide)
@@ -778,8 +778,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ? 'Welcome' 
         : (widget.isLogin ? 'Welcome back 👋' : 'Welcome 👋');
 
+    final theme = Theme.of(context);
     return SingleChildScrollView(
-      padding: EdgeInsets.all(isWide ? 40 : 20),
+      padding: EdgeInsets.all(isWide ? AppSpacing.huge : AppSpacing.edge),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -793,20 +794,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     FadeInDown(
                       duration: const Duration(milliseconds: 600),
                       child: GlowingText(welcomeMsg,
-                          style: TextStyle(
-                              fontSize: isWide ? 48 : 32,
-                              fontWeight: FontWeight.w900,
-                              color: Theme.of(context).colorScheme.onSurface)),
+                          style: isWide ? theme.textTheme.displayLarge : theme.textTheme.headlineLarge),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.small),
                     FadeInDown(
                       duration: const Duration(milliseconds: 600),
                       delay: const Duration(milliseconds: 100),
                       child: Text('Monitor your global asset health and security status.',
                           softWrap: true,
-                          style: TextStyle(
-                              fontSize: 15,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                     ),
                   ],
                 ),
@@ -839,21 +836,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ],
-          SizedBox(height: isWide ? 48 : 32),
+          SizedBox(height: isWide ? AppSpacing.huge : AppSpacing.xlarge),
           FadeInUp(
             duration: const Duration(milliseconds: 800),
             delay: const Duration(milliseconds: 200),
             child: _premiumHeroCard(),
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: AppSpacing.huge),
           _sectionLabel('CORE VAULT FEATURES'),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.large),
           GridView.count(
-            crossAxisCount: isWide ? 4 : (MediaQuery.of(context).size.width > 600 ? 2 : 1),
+            crossAxisCount: isWide ? 4 : (MediaQuery.sizeOf(context).width > 600 ? 2 : 1),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
+            crossAxisSpacing: AppSpacing.large,
+            mainAxisSpacing: AppSpacing.large,
             childAspectRatio: 1.4,
             children: [
               _featureGridCard('Assets', 'Digital & Physical', Icons.account_balance_wallet_outlined, 0, () => _onMenuItemSelected(1)),
@@ -868,28 +865,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _featureGridCard(String title, String subtitle, IconData icon, int index, VoidCallback onTap) {
+    final theme = Theme.of(context);
     return FadeInUp(
       duration: const Duration(milliseconds: 600),
       delay: Duration(milliseconds: 300 + (index * 100)),
       child: GlassCard(
         onTap: onTap,
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSpacing.large),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppSpacing.medium),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 24),
+              child: Icon(icon, color: theme.colorScheme.primary, size: 24),
             ),
-            const SizedBox(height: 20),
-            Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
-            const SizedBox(height: 4),
-            Text(subtitle, style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+            const SizedBox(height: AppSpacing.medium),
+            Text(title, style: theme.textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.tiny),
+            Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5))),
           ],
         ),
       ),
@@ -897,11 +895,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _premiumHeroCard() {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isMobile = screenWidth < 600;
 
     return GlassCard(
-      padding: EdgeInsets.symmetric(vertical: isMobile ? 40 : 80, horizontal: isMobile ? 24 : 40),
+      padding: EdgeInsets.symmetric(
+        vertical: isMobile ? AppSpacing.xlarge : AppSpacing.huge * 1.5, 
+        horizontal: isMobile ? AppSpacing.large : AppSpacing.huge
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 600),
@@ -909,29 +911,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _heroIcon(),
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.huge),
               Text(
                 'Your Digital Legacy, Secured.',
-                style: TextStyle(
-                  fontSize: isMobile ? 32 : 48,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  letterSpacing: -1,
-                ),
+                style: isMobile ? theme.textTheme.headlineLarge : theme.textTheme.displayLarge,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.large),
               Text(
                 'Welcome to Stardust. The most private and secure way to catalog your wealth, store your sensitive documents, and ensure your family has everything they need when it matters most.',
-                style: TextStyle(
-                  fontSize: isMobile ? 14 : 16,
-                  height: 1.6,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-                ),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                    height: 1.6,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.8)),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: AppSpacing.huge),
               _heroActionButtons(),
             ],
           ),
@@ -941,21 +935,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _heroIcon() {
+    final theme = Theme.of(context);
     return Container(
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+            color: theme.colorScheme.primary.withValues(alpha: 0.2),
             blurRadius: 40,
             spreadRadius: 10,
           )
         ],
       ),
-      child: Icon(Icons.shield_rounded, size: 48, color: Theme.of(context).colorScheme.primary),
+      child: Icon(Icons.shield_rounded, size: 48, color: theme.colorScheme.primary),
     );
   }
 
@@ -988,22 +983,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _heroButton({required String label, IconData? icon, required VoidCallback onPressed, required bool isPrimary, bool isGhost = false}) {
+    final theme = Theme.of(context);
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 140),
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.medium, horizontal: AppSpacing.medium),
           decoration: BoxDecoration(
             color: isPrimary 
-                ? Theme.of(context).colorScheme.primary 
-                : (isGhost ? Colors.transparent : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1)),
+                ? theme.colorScheme.primary 
+                : (isGhost ? Colors.transparent : theme.colorScheme.onSurface.withValues(alpha: 0.1)),
             borderRadius: BorderRadius.circular(12),
-            border: isGhost ? Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2), width: 1.5) : null,
+            border: isGhost ? Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.2), width: 1.5) : null,
             boxShadow: isPrimary ? [
               BoxShadow(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                color: theme.colorScheme.primary.withValues(alpha: 0.4),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               )
@@ -1013,8 +1009,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon != null) ...[Icon(icon, size: 18, color: isPrimary ? Colors.white : Theme.of(context).colorScheme.primary), const SizedBox(width: 8)],
-              Text(label, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: isPrimary ? Colors.white : Theme.of(context).colorScheme.onSurface)),
+              if (icon != null) ...[Icon(icon, size: 18, color: isPrimary ? Colors.white : theme.colorScheme.primary), const SizedBox(width: AppSpacing.small)],
+              Text(label, style: theme.textTheme.labelLarge?.copyWith(color: isPrimary ? Colors.white : theme.colorScheme.onSurface)),
             ],
           ),
         ),
@@ -1045,12 +1041,13 @@ class _SidebarTileState extends State<_SidebarTile> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isSelected = widget.selected;
     final active = isSelected || _isHovering;
-    final color = active ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4);
+    final color = active ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.4);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.medium, vertical: AppSpacing.tiny),
       child: MouseRegion(
         onEnter: (_) => setState(() => _isHovering = true),
         onExit: (_) => setState(() => _isHovering = false),
@@ -1059,13 +1056,13 @@ class _SidebarTileState extends State<_SidebarTile> {
           borderRadius: BorderRadius.circular(12),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.medium, vertical: AppSpacing.medium - 2),
             decoration: BoxDecoration(
-              color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
+              color: isSelected ? theme.colorScheme.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
               boxShadow: isSelected ? [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.4),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 )
@@ -1074,13 +1071,12 @@ class _SidebarTileState extends State<_SidebarTile> {
             child: Row(
               children: [
                 Icon(widget.icon, color: isSelected ? Colors.white : color, size: 20),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpacing.medium),
                 Text(
                   widget.label,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : (active ? Theme.of(context).colorScheme.onSurface : color.withValues(alpha: Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.8)),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: isSelected ? Colors.white : (active ? theme.colorScheme.onSurface : color.withValues(alpha: theme.brightness == Brightness.dark ? 0.4 : 0.8)),
                     fontWeight: FontWeight.w900,
-                    fontSize: 14,
                   ),
                 ),
               ],

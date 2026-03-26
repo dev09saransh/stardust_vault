@@ -9,6 +9,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: StardustBackground(
         child: SafeArea(
@@ -17,24 +18,24 @@ class SettingsScreen extends StatelessWidget {
               _header(context),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(AppSpacing.edge),
                   children: [
                     _sectionHeader(context, 'Profile'),
                     _settingsTile(context, Icons.person_outline_rounded, 'Account Details', 'Guest User'),
                     _settingsTile(context, Icons.alternate_email_rounded, 'Email Address', 'guest@example.com'),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.large),
                     _sectionHeader(context, 'Security'),
                     _settingsTile(context, Icons.fingerprint_rounded, 'Biometric Lock', 'Enabled', toggle: true),
                     _settingsTile(context, Icons.verified_user_rounded, 'Two-Factor Auth', 'Enabled'),
                     _settingsTile(context, Icons.key_rounded, 'Change Password', ''),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.large),
                     _sectionHeader(context, 'Preferences'),
                     _settingsTile(context, Icons.notifications_none_rounded, 'Notifications', 'On', toggle: true),
                     _settingsTile(context, Icons.language_rounded, 'Language', 'English'),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.huge),
                     TextButton(
                       onPressed: () => Navigator.pushReplacementNamed(context, '/auth'),
-                      child: const Text('Log Out', style: TextStyle(color: Colors.redAccent, fontSize: 16)),
+                      child: Text('Log Out', style: theme.textTheme.labelLarge?.copyWith(color: Colors.redAccent)),
                     ),
                   ],
                 ),
@@ -47,64 +48,62 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Widget _header(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.edge),
       child: Row(
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            icon: Icon(Icons.arrow_back_ios_rounded,
+                color: theme.colorScheme.onSurface,
+                size: isMobile ? 20 : 24),
             onPressed: onBack ?? () => Navigator.pop(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.small),
           Text('Settings',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w400,
-                  color: Theme.of(context).colorScheme.onSurface)),
+              style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge),
         ],
       ),
     );
   }
 
   Widget _sectionHeader(BuildContext context, String title) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.small),
       child: Text(title,
-          style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
-              letterSpacing: 1)),
+          style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: theme.colorScheme.primary,
+              letterSpacing: 1.5,
+              fontSize: 10)),
     );
   }
 
   Widget _settingsTile(BuildContext context, IconData icon, String title, String value, {bool toggle = false}) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.small),
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.medium, vertical: AppSpacing.medium - 2),
         child: Row(
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 22),
-            const SizedBox(width: 16),
+            Icon(icon, color: theme.colorScheme.onSurface.withValues(alpha: 0.6), size: 22),
+            const SizedBox(width: AppSpacing.medium),
             Expanded(
               child: Text(title,
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w400)),
+                  style: theme.textTheme.bodyLarge),
             ),
             if (toggle)
-              Switch(value: true, onChanged: (_) {}, activeThumbImage: null, activeColor: Theme.of(context).colorScheme.primary)
+              Switch(value: true, onChanged: (_) {}, activeThumbImage: null, activeColor: theme.colorScheme.primary)
             else if (value.isNotEmpty)
               Text(value,
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6))),
-            if (!toggle) const SizedBox(width: 8),
+                  style: theme.textTheme.bodySmall),
+            if (!toggle) const SizedBox(width: AppSpacing.small),
             if (!toggle)
               Icon(Icons.arrow_forward_ios_rounded,
-                  size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
+                  size: 14, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3)),
           ],
         ),
       ),

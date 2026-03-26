@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'glass_card.dart';
 import '../utils/card_benefits.dart';
+import '../theme.dart';
 import 'package:animate_do/animate_do.dart';
 
 class CardBenefitsSheet extends StatelessWidget {
@@ -15,16 +16,16 @@ class CardBenefitsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final benefits = CardBenefitsProvider.getBenefits(cardName, cardVariant);
 
     return GlassCard(
-      margin: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        left: 16,
-        right: 16,
-        top: 100,
-      ),
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.fromLTRB(
+          AppSpacing.medium,
+          100,
+          AppSpacing.medium,
+          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+      padding: const EdgeInsets.all(AppSpacing.large),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,47 +33,41 @@ class CardBenefitsSheet extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(AppSpacing.medium - 4),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.credit_card_rounded, color: Theme.of(context).colorScheme.primary),
+                child: Icon(Icons.credit_card_rounded, color: theme.colorScheme.primary),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.medium),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(cardName,
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Theme.of(context).colorScheme.onSurface)),
+                        style: theme.textTheme.headlineSmall),
                     Text(cardVariant,
-                        style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5))),
+                        style: theme.textTheme.bodySmall),
                   ],
                 ),
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded),
+                icon: const Icon(Icons.close_rounded, size: 20),
                 style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                  backgroundColor: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.large),
           Text('PREMIUM BENEFITS',
-              style: TextStyle(
-                  fontSize: 11,
+              style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
-                  color: Theme.of(context).colorScheme.primary)),
-          const SizedBox(height: 16),
+                  color: theme.colorScheme.primary)),
+          const SizedBox(height: AppSpacing.medium),
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
@@ -83,33 +78,29 @@ class CardBenefitsSheet extends StatelessWidget {
                 return FadeInRight(
                   delay: Duration(milliseconds: index * 100),
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.medium),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(AppSpacing.small + 2),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Icon(benefit.icon, size: 20, color: Theme.of(context).colorScheme.onSurface),
+                          child: Icon(benefit.icon, size: 20, color: theme.colorScheme.onSurface),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: AppSpacing.medium),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(benefit.title,
-                                  style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.onSurface)),
-                              const SizedBox(height: 4),
+                                  style: theme.textTheme.titleMedium),
+                              const SizedBox(height: 2),
                               Text(benefit.description,
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6))),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4))),
                             ],
                           ),
                         ),
@@ -120,15 +111,15 @@ class CardBenefitsSheet extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.small),
           Center(
             child: Text(
               '* Verify benefits with your bank. Terms & conditions apply.',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 10,
                   fontStyle: FontStyle.italic,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
             ),
           ),
           const SizedBox(height: 16),

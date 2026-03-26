@@ -8,6 +8,7 @@ import 'package:animate_do/animate_do.dart';
 import '../../widgets/drop_zone_wrapper.dart';
 import '../../widgets/add_doc_sheet.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../theme.dart';
 
 class InsuranceScreen extends StatefulWidget {
   final List<Map<String, String>> policies;
@@ -67,6 +68,7 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: DropZoneWrapper(
         onDrop: _onFileDropped,
@@ -79,7 +81,7 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
                   child: widget.policies.isEmpty
                       ? _emptyState(context)
                       : ListView.builder(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(AppSpacing.edge),
                           itemCount: widget.policies.length,
                           itemBuilder: (context, index) {
                             final policy = widget.policies[index];
@@ -87,15 +89,15 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
                               duration: const Duration(milliseconds: 400),
                               delay: Duration(milliseconds: index * 100),
                               child: Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.only(bottom: AppSpacing.medium),
                                 child: GlassCard(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(AppSpacing.medium),
                                   child: Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(AppSpacing.medium - 4),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.primary
+                                          color: theme.colorScheme.primary
                                               .withValues(alpha: 0.1),
                                           shape: BoxShape.circle,
                                         ),
@@ -103,33 +105,25 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
                                           policy['type'] == 'Health'
                                               ? Icons.health_and_safety_rounded
                                               : Icons.directions_car_rounded,
-                                          color: Theme.of(context).colorScheme.primary,
+                                          color: theme.colorScheme.primary,
                                           size: 24,
                                         ),
                                       ),
-                                      const SizedBox(width: 16),
+                                      const SizedBox(width: AppSpacing.medium),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(policy['provider']!,
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Theme.of(context).colorScheme.onSurface)),
+                                                style: theme.textTheme.titleLarge),
                                             Text(policy['type']!,
-                                                style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: Theme.of(context).colorScheme.onSurfaceVariant
-                                                        .withValues(alpha: 0.6))),
+                                                style: theme.textTheme.bodySmall),
                                           ],
                                         ),
                                       ),
                                       Text(policy['policyNo']!,
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              color: Theme.of(context).colorScheme.onSurface)),
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                              color: theme.colorScheme.onSurface)),
                                     ],
                                   ),
                                 ),
@@ -152,40 +146,38 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
   }
 
   Widget _header(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
     return Padding(
-      padding: EdgeInsets.all(isMobile ? 12 : 16),
+      padding: const EdgeInsets.all(AppSpacing.edge),
       child: Row(
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: Theme.of(context).colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
                 size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.small),
           Text('Insurance',
-              style: TextStyle(
-                  fontSize: isMobile ? 22 : 28,
-                  fontWeight: FontWeight.w900,
-                  color: Theme.of(context).colorScheme.onSurface)),
+              style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge),
         ],
       ),
     );
   }
 
   Widget _emptyState(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.health_and_safety_outlined,
-              size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
-          const SizedBox(height: 16),
+              size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
+          const SizedBox(height: AppSpacing.medium),
           Text('No policies added yet',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                  fontSize: 16)),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
         ],
       ),
     );
@@ -207,46 +199,47 @@ class _AddPolicySheetState extends State<_AddPolicySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GlassCard(
-      margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 100),
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.fromLTRB(
+          AppSpacing.medium,
+          100,
+          AppSpacing.medium,
+          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+      padding: const EdgeInsets.all(AppSpacing.large),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Add New Policy',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSurface)),
-          const SizedBox(height: 24),
+              style: theme.textTheme.headlineMedium),
+          const SizedBox(height: AppSpacing.large),
           TextField(
             controller: _providerController,
             decoration: const InputDecoration(labelText: 'Provider Name'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.medium),
           TextField(
             controller: _policyNoController,
             decoration: const InputDecoration(labelText: 'Policy Number'),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.medium),
           Text('Type',
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _typeChip('Health'),
-              const SizedBox(width: 12),
-              _typeChip('Vehicle'),
-              const SizedBox(width: 12),
-              _typeChip('Life'),
-            ],
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          const SizedBox(height: AppSpacing.small),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _typeChip('Health'),
+                const SizedBox(width: AppSpacing.medium),
+                _typeChip('Vehicle'),
+                const SizedBox(width: AppSpacing.medium),
+                _typeChip('Life'),
+              ],
+            ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xlarge),
           GradientButton(
             text: 'Add Policy',
             onPressed: () {
@@ -256,36 +249,36 @@ class _AddPolicySheetState extends State<_AddPolicySheet> {
               }
             },
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
   Widget _typeChip(String label) {
+    final theme = Theme.of(context);
     final selected = _type == label;
     return GestureDetector(
       onTap: () => setState(() => _type = label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: AppSpacing.small + 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: selected
-              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+              ? theme.colorScheme.primary.withValues(alpha: 0.2)
               : Colors.white.withValues(alpha: 0.05),
           border: Border.all(
             color: selected
-                ? Theme.of(context).colorScheme.primary
+                ? theme.colorScheme.primary
                 : Colors.white.withValues(alpha: 0.1),
           ),
         ),
         child: Text(label,
-            style: TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
                 color: selected 
-                    ? Theme.of(context).colorScheme.onSurface 
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w500 : FontWeight.w400)),
+                    ? theme.colorScheme.onSurface 
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
       ),
     );
   }

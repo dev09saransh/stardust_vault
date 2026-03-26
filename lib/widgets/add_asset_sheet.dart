@@ -27,26 +27,24 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isCard = widget.category == 'Cards';
     
     return GlassCard(
-      margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 100),
-      padding: const EdgeInsets.all(24),
+      margin: EdgeInsets.fromLTRB(
+          AppSpacing.medium,
+          100,
+          AppSpacing.medium,
+          MediaQuery.sizeOf(context).viewInsets.bottom + AppSpacing.xlarge),
+      padding: const EdgeInsets.all(AppSpacing.large),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(isCard ? 'Add New Card' : 'Add New Asset',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Theme.of(context).colorScheme.onSurface)),
-            const SizedBox(height: 24),
+                style: theme.textTheme.headlineMedium),
+            const SizedBox(height: AppSpacing.large),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
@@ -54,7 +52,7 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
                 hintText: isCard ? 'e.g. HDFC Millennia' : '',
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.medium),
             if (isCard) ...[
               TextField(
                 controller: _variantController,
@@ -63,7 +61,7 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
                   hintText: 'e.g. Gold, Platinum, Signature',
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.medium),
               TextField(
                 controller: _typeDetailController,
                 decoration: const InputDecoration(
@@ -77,20 +75,20 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
                 decoration: const InputDecoration(labelText: 'Value / Identifier'),
               ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.medium),
             if (!isCard) ...[
               Text('Category',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14)),
-              const SizedBox(height: 8),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              const SizedBox(height: AppSpacing.small),
               Row(
                 children: [
                   _typeChip('Digital'),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.medium),
                   _typeChip('Physical'),
                 ],
               ),
             ],
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xlarge),
             GradientButton(
               text: isCard ? 'Add Card' : 'Add Asset',
               onPressed: () {
@@ -105,7 +103,6 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
                 }
               },
             ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -113,29 +110,30 @@ class _AddAssetSheetState extends State<AddAssetSheet> {
   }
 
   Widget _typeChip(String label) {
+    final theme = Theme.of(context);
     final selected = _type == label;
     return GestureDetector(
       onTap: () => setState(() => _type = label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.large, vertical: AppSpacing.small + 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: selected
-              ? AppTheme.lavenderAccent.withValues(alpha: 0.2)
+              ? theme.colorScheme.primary.withValues(alpha: 0.2)
               : Colors.white.withValues(alpha: 0.05),
           border: Border.all(
             color: selected
-                ? AppTheme.lavenderAccent
+                ? theme.colorScheme.primary
                 : Colors.white.withValues(alpha: 0.1),
           ),
         ),
         child: Text(label,
-            style: TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
                 color: selected 
-                    ? Theme.of(context).colorScheme.onSurface 
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: selected ? FontWeight.w500 : FontWeight.w400)),
+                    ? theme.colorScheme.onSurface 
+                    : theme.colorScheme.onSurfaceVariant,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
       ),
     );
   }
