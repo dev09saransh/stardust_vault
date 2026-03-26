@@ -3,8 +3,11 @@ import '../../widgets/stardust_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/success_animation.dart';
 import '../../widgets/add_contact_sheet.dart';
+import '../../widgets/add_doc_sheet.dart';
 import '../../widgets/login_prompt.dart';
+import '../../widgets/drop_zone_wrapper.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../theme.dart';
 
 class ContactsScreen extends StatefulWidget {
@@ -18,6 +21,33 @@ class ContactsScreen extends StatefulWidget {
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
+
+  void _onFileDropped(XFile file) {
+    if (widget.isGuest) {
+      LoginRequiredPrompt.show(context);
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => AddDocSheet(
+        type: 'Identity',
+        initialFile: file,
+        onAdd: (title) {
+          setState(() {
+            widget.contacts.add({
+              'name': title,
+              'relation': 'Identity Doc',
+              'phone': 'N/A',
+              'status': 'Pending'
+            });
+          });
+          SuccessAnimationOverlay.show(context);
+        },
+      ),
+    );
+  }
 
   void _addContact() {
     if (widget.isGuest) {
@@ -41,7 +71,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      body: StardustBackground(
+      body: DropZoneWrapper(
+        onDrop: _onFileDropped,
+        child: StardustBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -121,6 +153,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

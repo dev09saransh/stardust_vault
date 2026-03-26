@@ -10,6 +10,7 @@ import 'features/passwords_screen.dart';
 import 'features/contacts_screen.dart';
 import 'features/legal_center_screen.dart';
 import 'features/security_log_screen.dart';
+import 'features/others_screen.dart';
 import 'package:animate_do/animate_do.dart';
 import '../widgets/intro_modal.dart';
 import '../widgets/guided_tour.dart';
@@ -58,6 +59,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {'title': 'Will & Testament', 'date': '2025-10-12', 'status': 'Signed'},
     {'title': 'Property Deed', 'date': '2024-05-20', 'status': 'Vaulted'},
   ];
+  final List<Map<String, String>> _others = [
+    {'title': 'Warranty Card - MacBook', 'date': '2025-08-01', 'status': 'Vaulted'},
+  ];
 
   bool _showIntro = true;
   bool _showTour = false;
@@ -71,6 +75,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     {'icon': Icons.lock_rounded, 'label': 'Passwords'},
     {'icon': Icons.gavel_rounded, 'label': 'Legal Center'},
     {'icon': Icons.contacts_rounded, 'label': 'Contacts'},
+    {'icon': Icons.folder_special_rounded, 'label': 'Others'},
     {'icon': Icons.security_rounded, 'label': 'Security Log'},
   ];
 
@@ -163,6 +168,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   'pass': '••••••••'
                 });
                 break;
+              case 'Identity':
+                _contacts.add({
+                  'name': title,
+                  'relation': 'Identity Doc',
+                  'phone': 'N/A',
+                  'status': 'Pending'
+                });
+                break;
+              case 'Others':
+                _others.add({
+                  'title': title,
+                  'date': DateTime.now().toString().split(' ')[0],
+                  'status': 'Vaulted'
+                });
+                break;
               case 'Legal Docs':
               default:
                 _docs.add({
@@ -226,7 +246,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     3, // Passwords
                     4, // Legal Center
                     5, // Contacts
-                    6, // Security Log
+                    6, // Others
+                    7, // Security Log
                   ][index];
                   setState(() => _selectedIndex = targetIndex);
                 },
@@ -262,6 +283,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: Icons.contacts_rounded,
                   ),
                   TourStep(
+                    title: 'Others',
+                    description: 'Store miscellaneous documents like warranties, receipts, and other important files.',
+                    icon: Icons.folder_special_rounded,
+                  ),
+                  TourStep(
                     title: 'Real-time Security Log',
                     description: 'Monitor all access attempts and security events to keep your data safe.',
                     icon: Icons.security_rounded,
@@ -293,6 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {'label': 'Passwords', 'icon': Icons.password_outlined, 'color': Colors.teal, 'index': 3},
       {'label': 'Legal Docs', 'icon': Icons.gavel_outlined, 'color': Colors.purple, 'index': 4},
       {'label': 'Contacts', 'icon': Icons.people_outline, 'color': Colors.indigo, 'index': 5},
+      {'label': 'Others', 'icon': Icons.folder_special_outlined, 'color': Colors.brown, 'index': 6},
     ];
 
     final theme = Theme.of(context);
@@ -406,6 +433,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       {'label': 'Insurance', 'icon': Icons.health_and_safety_outlined, 'color': Colors.red},
       {'label': 'Passwords', 'icon': Icons.password_outlined, 'color': Colors.teal},
       {'label': 'Legal Docs', 'icon': Icons.gavel_outlined, 'color': Colors.purple},
+      {'label': 'Identity', 'icon': Icons.badge_outlined, 'color': Colors.indigo},
+      {'label': 'Others', 'icon': Icons.folder_special_outlined, 'color': Colors.brown},
     ];
 
     final theme = Theme.of(context);
@@ -792,6 +821,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       PasswordsScreen(passwords: _passwords, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
       LegalCenterScreen(docs: _docs, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
       ContactsScreen(contacts: _contacts, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
+      OthersScreen(others: _others, onBack: () => setState(() => _selectedIndex = 0), isGuest: widget.isGuest),
       SecurityLogScreen(),
     ];
 

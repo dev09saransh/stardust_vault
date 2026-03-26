@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 import '../../widgets/stardust_background.dart';
 import '../../widgets/glass_card.dart';
 import '../../widgets/success_animation.dart';
-import '../../widgets/add_password_sheet.dart';
+import '../../widgets/add_doc_sheet.dart';
 import '../../widgets/login_prompt.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../theme.dart';
 
-class PasswordsScreen extends StatefulWidget {
-  final List<Map<String, String>> passwords;
+class OthersScreen extends StatefulWidget {
+  final List<Map<String, String>> others;
   final VoidCallback? onBack;
   final bool isGuest;
-  const PasswordsScreen({super.key, required this.passwords, this.onBack, this.isGuest = false});
+  const OthersScreen({super.key, required this.others, this.onBack, this.isGuest = false});
 
   @override
-  State<PasswordsScreen> createState() => _PasswordsScreenState();
+  State<OthersScreen> createState() => _OthersScreenState();
 }
 
-class _PasswordsScreenState extends State<PasswordsScreen> {
+class _OthersScreenState extends State<OthersScreen> {
 
-  void _addPassword() {
+  void _addDoc() {
     if (widget.isGuest) {
       LoginRequiredPrompt.show(context);
       return;
@@ -28,12 +30,37 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AddPasswordSheet(onAdd: (site, username, pass) {
-        setState(() {
-          widget.passwords.add({'site': site, 'username': username, 'pass': pass});
-        });
-        SuccessAnimationOverlay.show(context);
-      }),
+      builder: (sheetContext) => AddDocSheet(
+        type: 'Others',
+        onAdd: (title) {
+          setState(() {
+            widget.others.add({'title': title, 'date': DateTime.now().toString().split(' ')[0], 'status': 'Vaulted'});
+          });
+          SuccessAnimationOverlay.show(context);
+        },
+      ),
+    );
+  }
+
+  void _onFileDropped(XFile file) {
+    if (widget.isGuest) {
+      LoginRequiredPrompt.show(context);
+      return;
+    }
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => AddDocSheet(
+        type: 'Others',
+        initialFile: file,
+        onAdd: (title) {
+          setState(() {
+            widget.others.add({'title': title, 'date': DateTime.now().toString().split(' ')[0], 'status': 'Vaulted'});
+          });
+          SuccessAnimationOverlay.show(context);
+        },
+      ),
     );
   }
 
@@ -41,19 +68,21 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      body: StardustBackground(
+      body: DropZoneWrapper(
+        onDrop: _onFileDropped,
+        child: StardustBackground(
           child: SafeArea(
             child: Column(
               children: [
                 _header(context),
                 Expanded(
-                  child: widget.passwords.isEmpty
+                  child: widget.others.isEmpty
                       ? _emptyState()
                       : ListView.builder(
                           padding: const EdgeInsets.all(AppSpacing.edge),
-                          itemCount: widget.passwords.length,
+                          itemCount: widget.others.length,
                           itemBuilder: (context, index) {
-                            final p = widget.passwords[index];
+                            final d = widget.others[index];
                             return FadeInUp(
                               duration: const Duration(milliseconds: 400),
                               delay: Duration(milliseconds: index * 100),
@@ -71,7 +100,7 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
                                           shape: BoxShape.circle,
                                         ),
                                         child: Icon(
-                                          Icons.lock_person_rounded,
+                                          Icons.folder_open_rounded,
                                           color: theme.colorScheme.primary,
                                           size: 24,
                                         ),
@@ -81,16 +110,27 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(p['site']!,
+                                            Text(d['title']!,
                                                 style: theme.textTheme.titleLarge),
-                                            const SizedBox(height: 2),
-                                            Text(p['username']!,
+                                            Text('Added on ${d['date']}',
                                                 style: theme.textTheme.bodySmall),
                                           ],
                                         ),
                                       ),
-                                      Icon(Icons.visibility_off_outlined,
-                                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6), size: 20),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpacing.small, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          d['status'] ?? 'Vaulted',
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -103,10 +143,11 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
             ),
           ),
         ),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addPassword,
+        onPressed: _addDoc,
         backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add_rounded, color: Colors.white),
+        child: const Icon(Icons.upload_file_rounded, color: Colors.white),
       ),
     );
   }
@@ -125,7 +166,7 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: AppSpacing.small),
-          Text('Passwords',
+          Text('Others',
               style: isMobile ? theme.textTheme.headlineMedium : theme.textTheme.headlineLarge),
         ],
       ),
@@ -138,12 +179,17 @@ class _PasswordsScreenState extends State<PasswordsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.lock_outline_rounded,
+          Icon(Icons.folder_open_outlined,
               size: 80, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.2)),
           const SizedBox(height: AppSpacing.medium),
-          Text('No passwords saved',
+          Text('No documents added',
               style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
+          const SizedBox(height: AppSpacing.small),
+          Text('Drop files here or tap + to upload miscellaneous documents',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3))),
         ],
       ),
     );
