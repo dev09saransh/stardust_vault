@@ -141,11 +141,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
         type: type,
         onAdd: (title) {
           setState(() {
-            _docs.add({
-              'title': title,
-              'date': DateTime.now().toString().split(' ')[0],
-              'status': 'Vaulted'
-            });
+            switch (type) {
+              case 'Assets':
+                _assets.add({
+                  'name': title,
+                  'value': 'Scanned',
+                  'type': 'Digital'
+                });
+                break;
+              case 'Insurance':
+                _policies.add({
+                  'provider': title,
+                  'policyNo': 'SCAN-${DateTime.now().millisecondsSinceEpoch % 10000}',
+                  'type': 'Scanned'
+                });
+                break;
+              case 'Passwords':
+                _passwords.add({
+                  'site': title,
+                  'username': 'user_vault',
+                  'pass': '••••••••'
+                });
+                break;
+              case 'Legal Docs':
+              default:
+                _docs.add({
+                  'title': title,
+                  'date': DateTime.now().toString().split(' ')[0],
+                  'status': 'Vaulted'
+                });
+                break;
+            }
           });
           SuccessAnimationOverlay.show(context);
         },
@@ -378,12 +404,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final docTypes = [
       {'label': 'Assets', 'icon': Icons.account_balance_wallet_outlined, 'color': Colors.blue},
       {'label': 'Insurance', 'icon': Icons.health_and_safety_outlined, 'color': Colors.red},
-      {'label': 'Legal', 'icon': Icons.gavel_outlined, 'color': Colors.purple},
-      {'label': 'Identity', 'icon': Icons.badge_outlined, 'color': Colors.orange},
-      {'label': 'Medical', 'icon': Icons.medical_services_outlined, 'color': Colors.green},
       {'label': 'Passwords', 'icon': Icons.password_outlined, 'color': Colors.teal},
-      {'label': 'Finance', 'icon': Icons.attach_money_rounded, 'color': Colors.indigo},
-      {'label': 'Others', 'icon': Icons.more_horiz_rounded, 'color': Colors.grey},
+      {'label': 'Legal Docs', 'icon': Icons.gavel_outlined, 'color': Colors.purple},
     ];
 
     final theme = Theme.of(context);
