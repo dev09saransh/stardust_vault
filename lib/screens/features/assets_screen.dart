@@ -12,11 +12,25 @@ import 'package:image_picker/image_picker.dart';
 import '../../widgets/document_viewer.dart';
 import '../../theme.dart';
 
+import 'package:flutter/material.dart';
+import '../../widgets/stardust_background.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/success_animation.dart';
+import '../../widgets/add_asset_sheet.dart';
+import '../../widgets/login_prompt.dart';
+import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import '../../widgets/add_doc_sheet.dart';
+import '../../widgets/card_benefits_sheet.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../widgets/document_viewer.dart';
+import '../../theme.dart';
+import '../../services/asset_service.dart';
+
 class AssetsScreen extends StatefulWidget {
-  final List<Map<String, String>> assets;
   final VoidCallback? onBack;
   final bool isGuest;
-  const AssetsScreen({super.key, required this.assets, this.onBack, this.isGuest = false});
+  const AssetsScreen({super.key, this.onBack, this.isGuest = false});
 
   @override
   State<AssetsScreen> createState() => _AssetsScreenState();
@@ -24,6 +38,12 @@ class AssetsScreen extends StatefulWidget {
 
 class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final AssetService _assetService = AssetService();
+  
+  List<Map<String, dynamic>> _assets = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
   final List<String> _categories = [
     'Real Estate',
     'Banking',
@@ -37,12 +57,36 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _tabController = TabController(length: _categories.length, vsync: this);
+    if (!widget.isGuest) {
+      _fetchAssets();
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchAssets() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final assets = await _assetService.getAssets();
+      setState(() {
+        _assets = assets;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _addAsset() {
@@ -57,11 +101,26 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => AddAssetSheet(
         category: currentCategory,
-        onAdd: (name, value, type) {
-          setState(() {
-            widget.assets.add({'name': name, 'value': value, 'type': type});
-          });
-          SuccessAnimationOverlay.show(context);
+        onAdd: (name, value, type) async {
+          try {
+            await _assetService.addAsset({
+              'category': currentCategory,
+              'title': name,
+              'metadata': {
+                'value': value,
+                'type': type,
+              },
+              'is_encrypted': 1,
+            });
+            _fetchAssets();
+            if (mounted) SuccessAnimationOverlay.show(context);
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to add asset: $e'), backgroundColor: Colors.redAccent),
+              );
+            }
+          }
         },
       ),
     );
@@ -79,16 +138,28 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
       builder: (sheetContext) => AddDocSheet(
         type: 'Asset',
         initialFile: file,
-        onAdd: (title, filePath) {
-          setState(() {
-            widget.assets.add({
-              'name': title,
-              'value': 'Uploaded File',
-              'type': 'Physical',
-              if (filePath != null) 'filePath': filePath,
+        onAdd: (title, fileKey, fileUrl) async {
+          try {
+            await _assetService.addAsset({
+              'category': _categories[_tabController.index],
+              'title': title,
+              'metadata': {
+                'value': 'Cloud Document',
+                'type': 'Physical',
+                'file_key': fileKey,
+                'file_url': fileUrl,
+              },
+              'is_encrypted': 1,
             });
-          });
-          SuccessAnimationOverlay.show(context);
+            _fetchAssets();
+            if (mounted) SuccessAnimationOverlay.show(context);
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to save document info: $e'), backgroundColor: Colors.redAccent),
+              );
+            }
+          }
         },
       ),
     );
@@ -145,88 +216,97 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
   }
 
   Widget _buildAssetList(String category) {
-    final filtered = widget.assets.where((a) {
-      if (category == 'Banking' && a['type'] == 'Digital') return true;
-      if (category == 'Real Estate' && a['type'] == 'Physical') return true;
-      if (category == 'Cards' && a['type'] == 'Card') return true;
-      // Default to showing some items if it's the first tab for demo
-      return category == _categories[0] && a['type'] != 'Card'; 
-    }).toList();
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
+    if (_errorMessage != null) {
+      return Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent)));
+    }
+
+    final filtered = _assets.where((a) => a['category'] == category).toList();
     final theme = Theme.of(context);
+    
     if (filtered.isEmpty) return _emptyState();
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(AppSpacing.edge),
-      itemCount: filtered.length,
-      itemBuilder: (context, index) {
-        final asset = filtered[index];
-        final isCard = asset['type'] == 'Card';
-        
-        return FadeInUp(
-          duration: const Duration(milliseconds: 400),
-          delay: Duration(milliseconds: index * 100),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.medium),
-            child: GlassCard(
-              onTap: isCard ? () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => CardBenefitsSheet(
-                    cardName: asset['name']!,
-                    cardVariant: asset['value']!,
-                  ),
-                );
-              } : (asset['filePath'] != null ? () {
-                DocumentViewer.show(
-                  context,
-                  title: asset['name']!,
-                  filePath: asset['filePath'],
-                );
-              } : null),
-              padding: const EdgeInsets.all(AppSpacing.medium),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.medium - 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
+    return RefreshIndicator(
+      onRefresh: _fetchAssets,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(AppSpacing.edge),
+        itemCount: filtered.length,
+        itemBuilder: (context, index) {
+          final asset = filtered[index];
+          final metadata = asset['metadata'] ?? {};
+          final type = metadata['type'] ?? 'Unknown';
+          final value = metadata['value'] ?? '';
+          final isCard = category == 'Cards' || type == 'Card';
+          
+          return FadeInUp(
+            duration: const Duration(milliseconds: 400),
+            delay: Duration(milliseconds: index * 100),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.medium),
+              child: GlassCard(
+                onTap: isCard ? () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => CardBenefitsSheet(
+                      cardName: asset['title'] ?? 'Unknown Card',
+                      cardVariant: value,
                     ),
-                    child: Icon(
-                      isCard 
-                          ? Icons.credit_card_rounded
-                          : (asset['type'] == 'Digital' ? Icons.currency_bitcoin_rounded : Icons.inventory_2_rounded),
-                      color: theme.colorScheme.primary,
-                      size: 24,
+                  );
+                } : (metadata['file_key'] != null || metadata['file_url'] != null ? () {
+                  DocumentViewer.show(
+                    context,
+                    title: asset['title'] ?? 'Document',
+                    fileKey: metadata['file_key'],
+                    filePath: metadata['file_url'],
+                  );
+                } : null),
+                padding: const EdgeInsets.all(AppSpacing.medium),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.medium - 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isCard 
+                            ? Icons.credit_card_rounded
+                            : (type == 'Digital' ? Icons.currency_bitcoin_rounded : Icons.inventory_2_rounded),
+                        color: theme.colorScheme.primary,
+                        size: 24,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.medium),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(asset['name']!,
-                            style: theme.textTheme.titleLarge),
-                        const SizedBox(height: 2),
-                        Text(isCard ? 'Tap to view benefits' : asset['type']!,
-                            style: isCard 
-                                ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)
-                                : theme.textTheme.bodySmall),
-                      ],
+                    const SizedBox(width: AppSpacing.medium),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(asset['title'] ?? 'Unnamed Asset',
+                              style: theme.textTheme.titleLarge),
+                          const SizedBox(height: 2),
+                          Text(isCard ? 'Tap to view benefits' : type,
+                              style: isCard 
+                                  ? theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)
+                                  : theme.textTheme.bodySmall),
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(asset['value']!,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.primary)),
-                ],
+                    Text(value,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.primary)),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -263,8 +343,13 @@ class _AssetsScreenState extends State<AssetsScreen> with SingleTickerProviderSt
           Text('No assets added yet',
               style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
+          if (!widget.isGuest) ...[
+            const SizedBox(height: AppSpacing.medium),
+            TextButton(onPressed: _fetchAssets, child: const Text('Refresh')),
+          ],
         ],
       ),
     );
   }
+}
 }

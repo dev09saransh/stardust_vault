@@ -39,7 +39,13 @@ class StardustApp extends StatelessWidget {
               '/recover-account': (_) => const RecoverAccountScreen(),
               '/otp-verification': (_) {
                 final args = settings.arguments as Map<String, dynamic>?;
-                return OTPVerificationScreen(isLogin: args?['isLogin'] ?? true);
+                return OTPVerificationScreen(
+                  isLogin: args?['isLogin'] ?? true,
+                  userId: args?['userId'],
+                  email: args?['email'],
+                  mobile: args?['mobile'],
+                  destinationSnippet: args?['destinationSnippet'],
+                );
               },
                '/dashboard': (_) {
                 final args = settings.arguments as Map<String, dynamic>?;

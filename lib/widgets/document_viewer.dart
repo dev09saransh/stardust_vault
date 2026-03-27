@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:animate_do/animate_do.dart';
 import 'dart:ui' as ui;
 import '../theme.dart';
+import '../services/upload_service.dart';
 
-class DocumentViewer extends StatelessWidget {
+class DocumentViewer extends StatefulWidget {
   final String title;
-  final String? filePath;
+  final String? filePath; // Can be a local path or a URL
+  final String? fileKey;  // S3 key for presigned URL fetching
   final String? date;
   final String? status;
 
@@ -15,6 +17,7 @@ class DocumentViewer extends StatelessWidget {
     super.key,
     required this.title,
     this.filePath,
+    this.fileKey,
     this.date,
     this.status,
   });
@@ -23,6 +26,7 @@ class DocumentViewer extends StatelessWidget {
   static void show(BuildContext context, {
     required String title,
     String? filePath,
+    String? fileKey,
     String? date,
     String? status,
   }) {
@@ -39,6 +43,7 @@ class DocumentViewer extends StatelessWidget {
             child: DocumentViewer(
               title: title,
               filePath: filePath,
+              fileKey: fileKey,
               date: date,
               status: status,
             ),
@@ -49,10 +54,57 @@ class DocumentViewer extends StatelessWidget {
   }
 
   @override
+  State<DocumentViewer> createState() => _DocumentViewerState();
+}
+
+class _DocumentViewerState extends State<DocumentViewer> {
+  final UploadService _uploadService = UploadService();
+  String? _displayUrl;
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveFilePath();
+  }
+
+  Future<void> _resolveFilePath() async {
+    if (widget.fileKey != null && widget.fileKey!.isNotEmpty) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      try {
+        final url = await _uploadService.getViewUrl(widget.fileKey!);
+        if (mounted) {
+          setState(() {
+            _displayUrl = url;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _error = 'Failed to fetch secure URL: $e';
+            _isLoading = false;
+            // Fallback to filePath if key fails
+            _displayUrl = widget.filePath;
+          });
+        }
+      }
+    } else {
+      setState(() {
+        _displayUrl = widget.filePath;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final hasFile = filePath != null && filePath!.isNotEmpty;
+    final hasContent = _displayUrl != null && _displayUrl!.isNotEmpty;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -71,9 +123,9 @@ class DocumentViewer extends StatelessWidget {
                   children: [
                     _header(context, theme),
                     Expanded(
-                      child: hasFile
-                          ? _imageViewer(context, theme)
-                          : _noFileState(theme),
+                      child: _isLoading 
+                        ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                        : (hasContent ? _imageViewer(context, theme) : _noFileState(theme)),
                     ),
                     _footer(context, theme),
                   ],
@@ -112,7 +164,7 @@ class DocumentViewer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    widget.title,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -120,9 +172,9 @@ class DocumentViewer extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (date != null)
+                  if (widget.date != null)
                     Text(
-                      'Added on $date',
+                      'Added on ${widget.date}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.6),
                       ),
@@ -130,21 +182,21 @@ class DocumentViewer extends StatelessWidget {
                 ],
               ),
             ),
-            if (status != null)
+            if (widget.status != null)
               Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.medium, vertical: 6),
                 decoration: BoxDecoration(
-                  color: _statusColor(status!).withValues(alpha: 0.2),
+                  color: _statusColor(widget.status!).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: _statusColor(status!).withValues(alpha: 0.5),
+                    color: _statusColor(widget.status!).withValues(alpha: 0.5),
                   ),
                 ),
                 child: Text(
-                  status!,
+                  widget.status!,
                   style: TextStyle(
-                    color: _statusColor(status!),
+                    color: _statusColor(widget.status!),
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
@@ -157,6 +209,8 @@ class DocumentViewer extends StatelessWidget {
   }
 
   Widget _imageViewer(BuildContext context, ThemeData theme) {
+    bool isNetwork = _displayUrl!.startsWith('http');
+    
     return FadeInUp(
       duration: const Duration(milliseconds: 500),
       child: Padding(
@@ -179,15 +233,15 @@ class DocumentViewer extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: kIsWeb
+                child: isNetwork || kIsWeb
                     ? Image.network(
-                        filePath!,
+                        _displayUrl!,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) =>
                             _errorState(theme),
                       )
                     : Image.file(
-                        File(filePath!),
+                        File(_displayUrl!),
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) =>
                             _errorState(theme),
@@ -223,7 +277,7 @@ class DocumentViewer extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.large),
             Text(
-              title,
+              widget.title,
               style: theme.textTheme.headlineMedium?.copyWith(
                 color: Colors.white,
               ),
@@ -231,15 +285,16 @@ class DocumentViewer extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.small),
             Text(
-              'No preview available for this document.',
+              _error ?? 'No preview available for this document.',
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.white.withValues(alpha: 0.5),
               ),
             ),
-            if (date != null) ...[
+            if (widget.date != null) ...[
               const SizedBox(height: AppSpacing.medium),
               Text(
-                'Added on $date',
+                'Added on ${widget.date}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.white.withValues(alpha: 0.4),
                 ),
@@ -270,6 +325,15 @@ class DocumentViewer extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.5),
             ),
           ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
@@ -284,7 +348,7 @@ class DocumentViewer extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (filePath != null) ...[
+            if (_displayUrl != null) ...[
               _footerHint(Icons.pinch_rounded, 'Pinch to zoom'),
               const SizedBox(width: AppSpacing.xlarge),
             ],

@@ -7,10 +7,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import '../theme.dart';
+import '../services/upload_service.dart';
 
 class AddDocSheet extends StatefulWidget {
   final String type;
-  final Function(String title, String? filePath) onAdd;
+  final Function(String title, String? fileKey, String? fileUrl) onAdd;
   final XFile? initialFile;
 
   const AddDocSheet({
@@ -27,37 +28,65 @@ class AddDocSheet extends StatefulWidget {
 class _AddDocSheetState extends State<AddDocSheet> {
   final _titleController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  final UploadService _uploadService = UploadService();
   XFile? _pickedFile;
+  bool _isUploading = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialFile != null) {
       _pickedFile = widget.initialFile;
-      // Pre-populate title from filename (removing extension and capitalizing)
-      final nameParts = _pickedFile!.name.split('.');
-      if (nameParts.isNotEmpty) {
-        final baseName = nameParts[0].replaceAll(RegExp(r'[-_]'), ' ');
-        _titleController.text = baseName.split(' ').map((s) => s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : '').join(' ');
+      _populateTitleFromFilename();
+    }
+  }
+
+  void _populateTitleFromFilename() {
+    if (_pickedFile == null) return;
+    final nameParts = _pickedFile!.name.split('.');
+    if (nameParts.isNotEmpty) {
+      final baseName = nameParts[0].replaceAll(RegExp(r'[-_]'), ' ');
+      _titleController.text = baseName.split(' ').map((s) => s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : '').join(' ');
+    }
+  }
+
+  Future<void> _handleUpload() async {
+    if (_pickedFile == null || _titleController.text.isEmpty) return;
+
+    setState(() => _isUploading = true);
+
+    try {
+      final result = await _uploadService.uploadFile(
+        File(_pickedFile!.path), 
+        folder: widget.type.toLowerCase(),
+      );
+      
+      widget.onAdd(_titleController.text, result.key, result.location);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.redAccent),
+        );
       }
     }
   }
 
   /// Launch the native document scanner (camera → edge detection → auto-crop)
-  /// Like CamScanner: opens camera, detects document edges, crops automatically
   Future<void> _scanDocument() async {
-    // On mobile: try native document scanner first (CamScanner-like experience)
     if (!kIsWeb) {
       try {
         final List<String>? imagesPath = await CunningDocumentScanner.getPictures(
           noOfPages: 1,
-          isGalleryImportAllowed: false, // Camera only — no file picker
+          isGalleryImportAllowed: false,
         );
 
         if (imagesPath != null && imagesPath.isNotEmpty) {
           setState(() {
             _pickedFile = XFile(imagesPath.first);
           });
+          _populateTitleFromFilename();
           if (_titleController.text.isEmpty) {
             _titleController.text = '${widget.type} Scan ${DateTime.now().day}/${DateTime.now().month}';
           }
@@ -65,11 +94,10 @@ class _AddDocSheetState extends State<AddDocSheet> {
         }
       } catch (e) {
         debugPrint('Document Scanner Error: $e');
-        // Fall through to camera picker fallback below
       }
     }
 
-    // Fallback: open camera directly via image_picker (works on web + mobile)
+    // Fallback: open camera directly via image_picker
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
@@ -87,15 +115,9 @@ class _AddDocSheetState extends State<AddDocSheet> {
       }
     } catch (e) {
       debugPrint('Camera fallback error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Camera not available. Try uploading a file instead.')),
-        );
-      }
     }
   }
 
-  /// Pick a file from gallery/files (no camera involved)
   Future<void> _pickFromGallery() async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -108,14 +130,10 @@ class _AddDocSheetState extends State<AddDocSheet> {
         setState(() {
           _pickedFile = image;
         });
+        _populateTitleFromFilename();
       }
     } catch (e) {
       debugPrint('Error picking image: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error accessing gallery')),
-        );
-      }
     }
   }
 
@@ -151,7 +169,7 @@ class _AddDocSheetState extends State<AddDocSheet> {
                     children: [
                       Text('Upload ${widget.type} Document',
                           style: theme.textTheme.headlineSmall),
-                      Text('Securely vault your files',
+                      Text('Securely vault your files to S3',
                           style: theme.textTheme.bodySmall),
                     ],
                   ),
@@ -159,40 +177,60 @@ class _AddDocSheetState extends State<AddDocSheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.large),
-            TextField(
-              controller: _titleController,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                labelText: 'Document Title',
-                hintText: 'e.g. ${widget.type} Policy 2025',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                prefixIcon: const Icon(Icons.edit_note_rounded),
+            if (_isUploading)
+              _uploadingState()
+            else ...[
+              TextField(
+                controller: _titleController,
+                onChanged: (_) => setState(() {}),
+                enabled: !_isUploading,
+                decoration: InputDecoration(
+                  labelText: 'Document Title',
+                  hintText: 'e.g. ${widget.type} Policy 2025',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: const Icon(Icons.edit_note_rounded),
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.large),
-            if (_pickedFile != null)
-              _imagePreview()
-            else
-              _selectionOptions(),
-            const SizedBox(height: AppSpacing.xlarge),
-            GradientButton(
-              text: 'Vault Document',
-              onPressed: (_pickedFile != null && _titleController.text.isNotEmpty)
-                  ? () {
-                      widget.onAdd(_titleController.text, _pickedFile?.path);
-                      Navigator.pop(context);
-                    }
-                  : null,
-            ),
-            const SizedBox(height: AppSpacing.medium),
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: theme.textTheme.bodySmall),
+              const SizedBox(height: AppSpacing.large),
+              if (_pickedFile != null)
+                _imagePreview()
+              else
+                _selectionOptions(),
+              const SizedBox(height: AppSpacing.xlarge),
+              GradientButton(
+                text: 'Vault to Cloud',
+                onPressed: (_pickedFile != null && _titleController.text.isNotEmpty && !_isUploading)
+                    ? _handleUpload
+                    : null,
               ),
-            ),
+              const SizedBox(height: AppSpacing.medium),
+              Center(
+                child: TextButton(
+                  onPressed: _isUploading ? null : () => Navigator.pop(context),
+                  child: Text('Cancel', style: theme.textTheme.bodySmall),
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _uploadingState() {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        children: [
+          const SizedBox(height: 40),
+          CircularProgressIndicator(color: theme.colorScheme.primary),
+          const SizedBox(height: AppSpacing.medium),
+          Text('Securing document in vault...', style: theme.textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.small),
+          Text('This file is being encrypted and stored in S3', 
+              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary)),
+          const SizedBox(height: 40),
+        ],
       ),
     );
   }
@@ -216,18 +254,19 @@ class _AddDocSheetState extends State<AddDocSheet> {
                   ? Image.network(_pickedFile!.path, fit: BoxFit.cover)
                   : Image.file(File(_pickedFile!.path), fit: BoxFit.cover),
             ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                onPressed: () => setState(() {
-                  _pickedFile = null;
-                  _titleController.clear();
-                }),
-                icon: const Icon(Icons.cancel_rounded, color: Colors.white, size: 28),
-                style: IconButton.styleFrom(backgroundColor: Colors.black.withValues(alpha: 0.5)),
+            if (!_isUploading)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () => setState(() {
+                    _pickedFile = null;
+                    _titleController.clear();
+                  }),
+                  icon: const Icon(Icons.cancel_rounded, color: Colors.white, size: 28),
+                  style: IconButton.styleFrom(backgroundColor: Colors.black.withValues(alpha: 0.5)),
+                ),
               ),
-            ),
             Positioned(
               bottom: 0,
               left: 0,

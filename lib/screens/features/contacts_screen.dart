@@ -11,17 +11,63 @@ import 'package:image_picker/image_picker.dart';
 import '../../widgets/document_viewer.dart';
 import '../../theme.dart';
 
+import 'package:flutter/material.dart';
+import '../../widgets/stardust_background.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/success_animation.dart';
+import '../../widgets/add_contact_sheet.dart';
+import '../../widgets/add_doc_sheet.dart';
+import '../../widgets/login_prompt.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../widgets/document_viewer.dart';
+import '../../theme.dart';
+import '../../services/contact_service.dart';
+
 class ContactsScreen extends StatefulWidget {
-  final List<Map<String, String>> contacts;
   final VoidCallback? onBack;
   final bool isGuest;
-  const ContactsScreen({super.key, required this.contacts, this.onBack, this.isGuest = false});
+  const ContactsScreen({super.key, this.onBack, this.isGuest = false});
 
   @override
   State<ContactsScreen> createState() => _ContactsScreenState();
 }
 
 class _ContactsScreenState extends State<ContactsScreen> {
+  final ContactService _contactService = ContactService();
+  List<Map<String, dynamic>> _contacts = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isGuest) {
+      _fetchContacts();
+    }
+  }
+
+  Future<void> _fetchContacts() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final contacts = await _contactService.getContacts();
+      setState(() {
+        _contacts = contacts;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   void _onFileDropped(XFile file) {
     if (widget.isGuest) {
@@ -35,14 +81,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
       builder: (sheetContext) => AddDocSheet(
         type: 'Identity',
         initialFile: file,
-        onAdd: (title, filePath) {
+        onAdd: (title, filePath) async {
+          // Placeholder for real upload logic
           setState(() {
-            widget.contacts.add({
+            _contacts.add({
               'name': title,
               'relation': 'Identity Doc',
               'phone': 'N/A',
               'status': 'Pending',
-              if (filePath != null) 'filePath': filePath,
+              'filePath': filePath,
             });
           });
           SuccessAnimationOverlay.show(context);
@@ -60,11 +107,23 @@ class _ContactsScreenState extends State<ContactsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => AddContactSheet(onAdd: (name, relation, phone) {
-        setState(() {
-          widget.contacts.add({'name': name, 'relation': relation, 'phone': phone, 'status': 'Pending'});
-        });
-        SuccessAnimationOverlay.show(context);
+      builder: (sheetContext) => AddContactSheet(onAdd: (name, relation, phone) async {
+        try {
+          await _contactService.addContact({
+            'name': name,
+            'relation': relation,
+            'phone': phone,
+            'status': 'Pending',
+          });
+          _fetchContacts();
+          if (mounted) SuccessAnimationOverlay.show(context);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to save contact: $e'), backgroundColor: Colors.redAccent),
+            );
+          }
+        }
       }),
     );
   }
@@ -76,94 +135,102 @@ class _ContactsScreenState extends State<ContactsScreen> {
       body: DropZoneWrapper(
         onDrop: _onFileDropped,
         child: StardustBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              _header(context),
-              Expanded(
-                child: widget.contacts.isEmpty
-                    ? _emptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(AppSpacing.edge),
-                        itemCount: widget.contacts.length,
-                        itemBuilder: (context, index) {
-                          final c = widget.contacts[index];
-                          return FadeInUp(
-                            duration: const Duration(milliseconds: 400),
-                            delay: Duration(milliseconds: index * 100),
-                            child: Padding(
-                              padding: const EdgeInsets.only(bottom: AppSpacing.medium),
-                              child: GlassCard(
-                                onTap: c['filePath'] != null ? () {
-                                  DocumentViewer.show(
-                                    context,
-                                    title: c['name']!,
-                                    filePath: c['filePath'],
-                                    status: c['status'],
-                                  );
-                                } : null,
-                                padding: const EdgeInsets.all(AppSpacing.medium),
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 24,
-                                      backgroundColor: theme.colorScheme.primary
-                                          .withValues(alpha: 0.1),
-                                      child: Icon(Icons.person_rounded,
-                                          color: theme.colorScheme.primary),
-                                    ),
-                                    const SizedBox(width: AppSpacing.medium),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(c['name']!,
-                                              style: theme.textTheme.titleLarge),
-                                          const SizedBox(height: 2),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.phone_outlined, size: 12,
-                                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                                              const SizedBox(width: AppSpacing.tiny),
-                                              Text(c['phone'] ?? 'N/A',
-                                                  style: theme.textTheme.bodySmall),
-                                            ],
+          child: SafeArea(
+            child: Column(
+              children: [
+                _header(context),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _errorMessage != null
+                          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent)))
+                          : _contacts.isEmpty
+                              ? _emptyState()
+                              : RefreshIndicator(
+                                  onRefresh: _fetchContacts,
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.all(AppSpacing.edge),
+                                    itemCount: _contacts.length,
+                                    itemBuilder: (context, index) {
+                                      final c = _contacts[index];
+                                      final status = c['status'] ?? 'Pending';
+                                      
+                                      return FadeInUp(
+                                        duration: const Duration(milliseconds: 400),
+                                        delay: Duration(milliseconds: index * 100),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: AppSpacing.medium),
+                                          child: GlassCard(
+                                            onTap: c['filePath'] != null ? () {
+                                              DocumentViewer.show(
+                                                context,
+                                                title: c['name'] ?? 'Contact',
+                                                filePath: c['filePath'],
+                                                status: status,
+                                              );
+                                            } : null,
+                                            padding: const EdgeInsets.all(AppSpacing.medium),
+                                            child: Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 24,
+                                                  backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                  child: Icon(Icons.person_rounded, color: theme.colorScheme.primary),
+                                                ),
+                                                const SizedBox(width: AppSpacing.medium),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(c['name'] ?? 'Unknown',
+                                                          style: theme.textTheme.titleLarge),
+                                                      const SizedBox(height: 2),
+                                                      Row(
+                                                        children: [
+                                                          Icon(Icons.phone_outlined,
+                                                              size: 12,
+                                                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                                                          const SizedBox(width: AppSpacing.tiny),
+                                                          Text(c['phone'] ?? 'N/A',
+                                                              style: theme.textTheme.bodySmall),
+                                                        ],
+                                                      ),
+                                                      Text(c['relation'] ?? 'Contact',
+                                                          style: theme.textTheme.bodySmall?.copyWith(
+                                                              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4))),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: AppSpacing.small, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: status == 'Verified'
+                                                        ? Colors.green.withValues(alpha: 0.1)
+                                                        : Colors.orange.withValues(alpha: 0.1),
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Text(
+                                                    status,
+                                                    style: theme.textTheme.labelSmall?.copyWith(
+                                                        color: status == 'Verified'
+                                                            ? Colors.greenAccent
+                                                            : Colors.orangeAccent,
+                                                        fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                          Text(c['relation']!,
-                                              style: theme.textTheme.bodySmall?.copyWith(
-                                                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4))),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: AppSpacing.small, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: c['status'] == 'Verified'
-                                            ? Colors.green.withValues(alpha: 0.1)
-                                            : Colors.orange.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        c['status']!,
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                            color: c['status'] == 'Verified'
-                                                ? Colors.greenAccent
-                                                : Colors.orangeAccent,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -183,8 +250,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: theme.colorScheme.onSurface,
-                size: isMobile ? 20 : 24),
+                color: theme.colorScheme.onSurface, size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: AppSpacing.small),
@@ -207,8 +273,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
           Text('No contacts added',
               style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
+          if (!widget.isGuest) ...[
+            const SizedBox(height: AppSpacing.medium),
+            TextButton(onPressed: _fetchContacts, child: const Text('Refresh')),
+          ],
         ],
       ),
     );
   }
+}
 }

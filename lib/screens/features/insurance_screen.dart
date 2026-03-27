@@ -11,17 +11,63 @@ import 'package:image_picker/image_picker.dart';
 import '../../widgets/document_viewer.dart';
 import '../../theme.dart';
 
+import 'package:flutter/material.dart';
+import '../../widgets/stardust_background.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/gradient_button.dart';
+import '../../widgets/success_animation.dart';
+import '../../widgets/login_prompt.dart';
+import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import '../../widgets/add_doc_sheet.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../widgets/document_viewer.dart';
+import '../../theme.dart';
+import '../../services/insurance_service.dart';
+
 class InsuranceScreen extends StatefulWidget {
-  final List<Map<String, String>> policies;
   final VoidCallback? onBack;
   final bool isGuest;
-  const InsuranceScreen({super.key, required this.policies, this.onBack, this.isGuest = false});
+  const InsuranceScreen({super.key, this.onBack, this.isGuest = false});
 
   @override
   State<InsuranceScreen> createState() => _InsuranceScreenState();
 }
 
 class _InsuranceScreenState extends State<InsuranceScreen> {
+  final InsuranceService _insuranceService = InsuranceService();
+  List<Map<String, dynamic>> _policies = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isGuest) {
+      _fetchPolicies();
+    }
+  }
+
+  Future<void> _fetchPolicies() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final policies = await _insuranceService.getInsurance();
+      setState(() {
+        _policies = policies;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   void _addPolicy() {
     if (widget.isGuest) {
@@ -32,11 +78,23 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (sheetContext) => _AddPolicySheet(onAdd: (provider, policyNo, type) {
-        setState(() {
-          widget.policies.add({'provider': provider, 'policyNo': policyNo, 'type': type});
-        });
-        SuccessAnimationOverlay.show(context);
+      builder: (sheetContext) => _AddPolicySheet(onAdd: (provider, policyNo, type) async {
+        try {
+          await _insuranceService.addInsurance({
+            'policy_name': provider,
+            'provider': provider,
+            'type': type,
+            'policy_number': policyNo,
+          });
+          _fetchPolicies();
+          if (mounted) SuccessAnimationOverlay.show(context);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to save policy: $e'), backgroundColor: Colors.redAccent),
+            );
+          }
+        }
       }),
     );
   }
@@ -53,16 +111,27 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
       builder: (sheetContext) => AddDocSheet(
         type: 'Insurance',
         initialFile: file,
-        onAdd: (title, filePath) {
-          setState(() {
-            widget.policies.add({
+        onAdd: (title, fileKey, fileUrl) async {
+          try {
+            await _insuranceService.addInsurance({
+              'policy_name': title,
               'provider': title,
-              'policyNo': 'UPLOAD-${DateTime.now().millisecond}',
               'type': 'General',
-              if (filePath != null) 'filePath': filePath,
+              'policy_number': 'SCAN-${DateTime.now().millisecond}',
+              'metadata': {
+                'file_key': fileKey,
+                'file_url': fileUrl,
+              },
             });
-          });
-          SuccessAnimationOverlay.show(context);
+            _fetchPolicies();
+            if (mounted) SuccessAnimationOverlay.show(context);
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to save policy document: $e'), backgroundColor: Colors.redAccent),
+              );
+            }
+          }
         },
       ),
     );
@@ -80,66 +149,75 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
               children: [
                 _header(context),
                 Expanded(
-                  child: widget.policies.isEmpty
-                      ? _emptyState(context)
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(AppSpacing.edge),
-                          itemCount: widget.policies.length,
-                          itemBuilder: (context, index) {
-                            final policy = widget.policies[index];
-                            return FadeInUp(
-                              duration: const Duration(milliseconds: 400),
-                              delay: Duration(milliseconds: index * 100),
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: AppSpacing.medium),
-                                child: GlassCard(
-                                  onTap: policy['filePath'] != null ? () {
-                                    DocumentViewer.show(
-                                      context,
-                                      title: policy['provider']!,
-                                      filePath: policy['filePath'],
-                                    );
-                                  } : null,
-                                  padding: const EdgeInsets.all(AppSpacing.medium),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(AppSpacing.medium - 4),
-                                        decoration: BoxDecoration(
-                                          color: theme.colorScheme.primary
-                                              .withValues(alpha: 0.1),
-                                          shape: BoxShape.circle,
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _errorMessage != null
+                          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent)))
+                          : _policies.isEmpty
+                              ? _emptyState(context)
+                              : RefreshIndicator(
+                                  onRefresh: _fetchPolicies,
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.all(AppSpacing.edge),
+                                    itemCount: _policies.length,
+                                    itemBuilder: (context, index) {
+                                      final policy = _policies[index];
+                                      final type = policy['type'] ?? 'General';
+                                      
+                                      return FadeInUp(
+                                        duration: const Duration(milliseconds: 400),
+                                        delay: Duration(milliseconds: index * 100),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: AppSpacing.medium),
+                                          child: GlassCard(
+                                            onTap: (policy['metadata']?['file_key'] != null || policy['metadata']?['file_url'] != null) ? () {
+                                              DocumentViewer.show(
+                                                context,
+                                                title: policy['provider'] ?? 'Policy',
+                                                fileKey: policy['metadata']?['file_key'],
+                                                filePath: policy['metadata']?['file_url'],
+                                              );
+                                            } : null,
+                                            padding: const EdgeInsets.all(AppSpacing.medium),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(AppSpacing.medium - 4),
+                                                  decoration: BoxDecoration(
+                                                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    type == 'Health'
+                                                        ? Icons.health_and_safety_rounded
+                                                        : Icons.directions_car_rounded,
+                                                    color: theme.colorScheme.primary,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: AppSpacing.medium),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(policy['provider'] ?? 'Unknown',
+                                                          style: theme.textTheme.titleLarge),
+                                                      Text(type,
+                                                          style: theme.textTheme.bodySmall),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(policy['policy_number'] ?? '',
+                                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                                        color: theme.colorScheme.onSurface)),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        child: Icon(
-                                          policy['type'] == 'Health'
-                                              ? Icons.health_and_safety_rounded
-                                              : Icons.directions_car_rounded,
-                                          color: theme.colorScheme.primary,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.medium),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(policy['provider']!,
-                                                style: theme.textTheme.titleLarge),
-                                            Text(policy['type']!,
-                                                style: theme.textTheme.bodySmall),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(policy['policyNo']!,
-                                          style: theme.textTheme.bodyMedium?.copyWith(
-                                              color: theme.colorScheme.onSurface)),
-                                    ],
+                                      );
+                                    },
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
                 ),
               ],
             ),
@@ -163,8 +241,7 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: theme.colorScheme.onSurface,
-                size: isMobile ? 20 : 24),
+                color: theme.colorScheme.onSurface, size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: AppSpacing.small),
@@ -187,6 +264,10 @@ class _InsuranceScreenState extends State<InsuranceScreen> {
           Text('No policies added yet',
               style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5))),
+          if (!widget.isGuest) ...[
+            const SizedBox(height: AppSpacing.medium),
+            TextButton(onPressed: _fetchPolicies, child: const Text('Refresh')),
+          ],
         ],
       ),
     );
@@ -220,8 +301,7 @@ class _AddPolicySheetState extends State<_AddPolicySheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Add New Policy',
-              style: theme.textTheme.headlineMedium),
+          Text('Add New Policy', style: theme.textTheme.headlineMedium),
           const SizedBox(height: AppSpacing.large),
           TextField(
             controller: _providerController,

@@ -10,17 +10,62 @@ import 'package:image_picker/image_picker.dart';
 import '../../widgets/document_viewer.dart';
 import '../../theme.dart';
 
+import 'package:flutter/material.dart';
+import '../../widgets/stardust_background.dart';
+import '../../widgets/glass_card.dart';
+import '../../widgets/success_animation.dart';
+import '../../widgets/add_doc_sheet.dart';
+import '../../widgets/login_prompt.dart';
+import 'package:animate_do/animate_do.dart';
+import '../../widgets/drop_zone_wrapper.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../widgets/document_viewer.dart';
+import '../../theme.dart';
+import '../../services/others_service.dart';
+
 class OthersScreen extends StatefulWidget {
-  final List<Map<String, String>> others;
   final VoidCallback? onBack;
   final bool isGuest;
-  const OthersScreen({super.key, required this.others, this.onBack, this.isGuest = false});
+  const OthersScreen({super.key, this.onBack, this.isGuest = false});
 
   @override
   State<OthersScreen> createState() => _OthersScreenState();
 }
 
 class _OthersScreenState extends State<OthersScreen> {
+  final OthersService _othersService = OthersService();
+  List<Map<String, dynamic>> _others = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!widget.isGuest) {
+      _fetchOthers();
+    }
+  }
+
+  Future<void> _fetchOthers() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final others = await _othersService.getOthers();
+      setState(() {
+        _others = others;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   void _addDoc() {
     if (widget.isGuest) {
@@ -33,16 +78,27 @@ class _OthersScreenState extends State<OthersScreen> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => AddDocSheet(
         type: 'Others',
-        onAdd: (title, filePath) {
-          setState(() {
-            widget.others.add({
+        onAdd: (title, fileKey, fileUrl) async {
+          try {
+            await _othersService.addOther({
               'title': title,
-              'date': DateTime.now().toString().split(' ')[0],
+              'description': 'Miscellaneous document',
               'status': 'Vaulted',
-              if (filePath != null) 'filePath': filePath,
+              'file_path': fileUrl ?? '',
+              'metadata': {
+                'file_key': fileKey,
+                'file_url': fileUrl,
+              },
             });
-          });
-          SuccessAnimationOverlay.show(context);
+            _fetchOthers();
+            if (mounted) SuccessAnimationOverlay.show(context);
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to save document: $e'), backgroundColor: Colors.redAccent),
+              );
+            }
+          }
         },
       ),
     );
@@ -60,16 +116,27 @@ class _OthersScreenState extends State<OthersScreen> {
       builder: (sheetContext) => AddDocSheet(
         type: 'Others',
         initialFile: file,
-        onAdd: (title, filePath) {
-          setState(() {
-            widget.others.add({
+        onAdd: (title, fileKey, fileUrl) async {
+          try {
+            await _othersService.addOther({
               'title': title,
-              'date': DateTime.now().toString().split(' ')[0],
+              'description': 'Dropped file',
               'status': 'Vaulted',
-              if (filePath != null) 'filePath': filePath,
+              'file_path': fileUrl ?? '',
+              'metadata': {
+                'file_key': fileKey,
+                'file_url': fileUrl,
+              },
             });
-          });
-          SuccessAnimationOverlay.show(context);
+            _fetchOthers();
+            if (mounted) SuccessAnimationOverlay.show(context);
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to save document: $e'), backgroundColor: Colors.redAccent),
+              );
+            }
+          }
         },
       ),
     );
@@ -87,75 +154,86 @@ class _OthersScreenState extends State<OthersScreen> {
               children: [
                 _header(context),
                 Expanded(
-                  child: widget.others.isEmpty
-                      ? _emptyState()
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(AppSpacing.edge),
-                          itemCount: widget.others.length,
-                          itemBuilder: (context, index) {
-                            final d = widget.others[index];
-                            return FadeInUp(
-                              duration: const Duration(milliseconds: 400),
-                              delay: Duration(milliseconds: index * 100),
-                              child: Padding(
-                                padding: const EdgeInsets.only(bottom: AppSpacing.medium),
-                                child: GlassCard(
-                                  onTap: () => DocumentViewer.show(
-                                    context,
-                                    title: d['title']!,
-                                    filePath: d['filePath'],
-                                    date: d['date'],
-                                    status: d['status'],
-                                  ),
-                                  padding: const EdgeInsets.all(AppSpacing.medium),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(AppSpacing.medium - 4),
-                                        decoration: BoxDecoration(
-                                          color: theme.colorScheme.primary
-                                              .withValues(alpha: 0.1),
-                                          shape: BoxShape.circle,
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _errorMessage != null
+                          ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent)))
+                          : _others.isEmpty
+                              ? _emptyState()
+                              : RefreshIndicator(
+                                  onRefresh: _fetchOthers,
+                                  child: ListView.builder(
+                                    padding: const EdgeInsets.all(AppSpacing.edge),
+                                    itemCount: _others.length,
+                                    itemBuilder: (context, index) {
+                                      final d = _others[index];
+                                      final date = d['created_at'] != null 
+                                          ? d['created_at'].toString().split('T')[0] 
+                                          : 'Recently';
+                                          
+                                      return FadeInUp(
+                                        duration: const Duration(milliseconds: 400),
+                                        delay: Duration(milliseconds: index * 100),
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: AppSpacing.medium),
+                                          child: GlassCard(
+                                            onTap: () => DocumentViewer.show(
+                                              context,
+                                              title: d['title'] ?? 'Document',
+                                              fileKey: d['metadata']?['file_key'],
+                                              filePath: d['metadata']?['file_url'] ?? d['file_path'],
+                                              date: date,
+                                              status: d['status'] ?? 'Vaulted',
+                                            ),
+                                            padding: const EdgeInsets.all(AppSpacing.medium),
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(AppSpacing.medium - 4),
+                                                  decoration: BoxDecoration(
+                                                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.folder_open_rounded,
+                                                    color: theme.colorScheme.primary,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: AppSpacing.medium),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(d['title'] ?? 'Miscellaneous',
+                                                          style: theme.textTheme.titleLarge),
+                                                      Text('Added on $date',
+                                                          style: theme.textTheme.bodySmall),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: AppSpacing.small, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                                    borderRadius: BorderRadius.circular(8),
+                                                  ),
+                                                  child: Text(
+                                                    d['status'] ?? 'Vaulted',
+                                                    style: theme.textTheme.labelSmall?.copyWith(
+                                                        color: theme.colorScheme.primary,
+                                                        fontWeight: FontWeight.bold),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                        child: Icon(
-                                          Icons.folder_open_rounded,
-                                          color: theme.colorScheme.primary,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      const SizedBox(width: AppSpacing.medium),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(d['title']!,
-                                                style: theme.textTheme.titleLarge),
-                                            Text('Added on ${d['date']}',
-                                                style: theme.textTheme.bodySmall),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.small, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          d['status'] ?? 'Vaulted',
-                                          style: theme.textTheme.labelSmall?.copyWith(
-                                              color: theme.colorScheme.primary,
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    ],
+                                      );
+                                    },
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
                 ),
               ],
             ),
@@ -179,8 +257,7 @@ class _OthersScreenState extends State<OthersScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_ios_rounded,
-                color: theme.colorScheme.onSurface,
-                size: isMobile ? 20 : 24),
+                color: theme.colorScheme.onSurface, size: isMobile ? 20 : 24),
             onPressed: widget.onBack ?? () => Navigator.pop(context),
           ),
           const SizedBox(width: AppSpacing.small),
@@ -208,8 +285,13 @@ class _OthersScreenState extends State<OthersScreen> {
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3))),
+          if (!widget.isGuest) ...[
+            const SizedBox(height: AppSpacing.medium),
+            TextButton(onPressed: _fetchOthers, child: const Text('Refresh')),
+          ],
         ],
       ),
     );
   }
+}
 }

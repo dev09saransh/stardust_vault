@@ -3,6 +3,7 @@ import '../widgets/stardust_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/gradient_button.dart';
 import '../theme.dart';
+import '../services/auth_service.dart';
 
 // ─── Unified Auth Screen ───
 class AuthScreen extends StatefulWidget {
@@ -15,12 +16,124 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final AuthService _auth = AuthService();
+  bool _isLoading = false;
   int _signUpStep = 1; // 1: Identity, 2: Security
+
+  // Controllers
+  final _loginIdentifierController = TextEditingController();
+  final _loginPasswordController = TextEditingController();
+
+  final _signUpNameController = TextEditingController();
+  final _signUpEmailController = TextEditingController();
+  final _signUpMobileController = TextEditingController();
+  final _signUpPasswordController = TextEditingController();
+  final _signUpConfirmController = TextEditingController();
+
+  // Security Questions State
+  int _selectedQuestionId = 1;
+  final _securityAnswerController = TextEditingController();
+
+  final List<Map<String, dynamic>> _securityQuestions = [
+    {'id': 1, 'question': 'What was your first pet\'s name?'},
+    {'id': 2, 'question': 'What is your mother\'s maiden name?'},
+    {'id': 3, 'question': 'What city were you born in?'},
+    {'id': 4, 'question': 'What was the make of your first car?'},
+  ];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _loginIdentifierController.dispose();
+    _loginPasswordController.dispose();
+    _signUpNameController.dispose();
+    _signUpEmailController.dispose();
+    _signUpMobileController.dispose();
+    _signUpPasswordController.dispose();
+    _signUpConfirmController.dispose();
+    _securityAnswerController.dispose();
+    super.dispose();
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+    );
+  }
+
+  Future<void> _handleLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await _auth.login(
+        _loginIdentifierController.text.trim(),
+        _loginPasswordController.text,
+      );
+      
+      if (mounted) {
+        Navigator.pushNamed(
+          context, 
+          '/otp-verification',
+          arguments: {
+            'isLogin': true, 
+            'userId': result['userId'],
+            'destinationSnippet': result['destinationSnippet']
+          },
+        );
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleSignUp() async {
+    if (_signUpPasswordController.text != _signUpConfirmController.text) {
+      _showError('Passwords do not match');
+      return;
+    }
+
+    if (_securityAnswerController.text.isEmpty) {
+      _showError('Please answer the security question');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final result = await _auth.register(
+        fullName: _signUpNameController.text.trim(),
+        email: _signUpEmailController.text.trim().isEmpty ? null : _signUpEmailController.text.trim(),
+        mobile: _signUpMobileController.text.trim(),
+        password: _signUpPasswordController.text,
+        securityAnswers: [
+          {'question_id': _selectedQuestionId, 'answer': _securityAnswerController.text.trim()}
+        ],
+      );
+      
+      if (mounted) {
+        Navigator.pushNamed(
+          context, 
+          '/otp-verification',
+          arguments: {
+            'isLogin': false, 
+            'userId': null,
+            'email': _signUpEmailController.text.trim().isEmpty ? null : _signUpEmailController.text.trim(),
+            'mobile': _signUpMobileController.text.trim(),
+            'destinationSnippet': result['destinationSnippet']
+          },
+        );
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -46,12 +159,12 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           Padding(
                             padding: const EdgeInsets.all(24),
                             child: SizedBox(
-                              height: 400,
+                              height: 480, // Increased height for more fields
                               child: TabBarView(
                                 controller: _tabController,
                                 children: [
-                                  _signInTab(),
-                                  _signUpTab(),
+                                  _isLoading ? const Center(child: CircularProgressIndicator()) : _signInTab(),
+                                  _isLoading ? const Center(child: CircularProgressIndicator()) : _signUpTab(),
                                 ],
                               ),
                             ),
@@ -127,17 +240,20 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const TextField(decoration: InputDecoration(labelText: 'Email Address')),
+        TextField(
+          controller: _loginIdentifierController,
+          decoration: const InputDecoration(labelText: 'Email or Mobile'),
+        ),
         const SizedBox(height: 16),
-        const TextField(decoration: InputDecoration(labelText: 'Password'), obscureText: true),
+        TextField(
+          controller: _loginPasswordController,
+          decoration: const InputDecoration(labelText: 'Password'),
+          obscureText: true,
+        ),
         const SizedBox(height: 24),
         GradientButton(
           text: 'Sign In',
-          onPressed: () => Navigator.pushNamed(
-            context, 
-            '/otp-verification',
-            arguments: {'isLogin': true},
-          ),
+          onPressed: _handleLogin,
         ),
         const SizedBox(height: 16),
         Row(
@@ -171,18 +287,55 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         ),
         const SizedBox(height: 32),
         if (_signUpStep == 1) ...[
-          const TextField(decoration: InputDecoration(labelText: 'Full Name')),
+          TextField(
+            controller: _signUpNameController,
+            decoration: const InputDecoration(labelText: 'Full Name'),
+          ),
           const SizedBox(height: 16),
-          const TextField(decoration: InputDecoration(labelText: 'Email Address')),
+          TextField(
+            controller: _signUpEmailController,
+            decoration: const InputDecoration(labelText: 'Email Address (Optional)'),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _signUpMobileController,
+            decoration: const InputDecoration(labelText: 'Mobile Number'),
+            keyboardType: TextInputType.phone,
+          ),
           const SizedBox(height: 24),
           GradientButton(
             text: 'Continue',
             onPressed: () => setState(() => _signUpStep = 2),
           ),
         ] else ...[
-          const TextField(decoration: InputDecoration(labelText: 'Password'), obscureText: true),
+          TextField(
+            controller: _signUpPasswordController,
+            decoration: const InputDecoration(labelText: 'Password'),
+            obscureText: true,
+          ),
           const SizedBox(height: 16),
-          const TextField(decoration: InputDecoration(labelText: 'Confirm Password'), obscureText: true),
+          TextField(
+            controller: _signUpConfirmController,
+            decoration: const InputDecoration(labelText: 'Confirm Password'),
+            obscureText: true,
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<int>(
+            value: _selectedQuestionId,
+            items: _securityQuestions.map((q) {
+              return DropdownMenuItem<int>(
+                value: q['id'] as int,
+                child: Text(q['question'] as String, style: const TextStyle(fontSize: 13)),
+              );
+            }).toList(),
+            onChanged: (val) => setState(() => _selectedQuestionId = val!),
+            decoration: const InputDecoration(labelText: 'Security Question'),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _securityAnswerController,
+            decoration: const InputDecoration(labelText: 'Security Answer'),
+          ),
           const SizedBox(height: 24),
           Row(
             children: [
@@ -196,11 +349,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               Expanded(
                 child: GradientButton(
                   text: 'Create',
-                  onPressed: () => Navigator.pushNamed(
-                    context, 
-                    '/otp-verification',
-                    arguments: {'isLogin': false},
-                  ),
+                  onPressed: _handleSignUp,
                 ),
               ),
             ],
@@ -375,17 +524,30 @@ class RecoverAccountScreen extends StatelessWidget {
 // ─── OTP Verification ───
 class OTPVerificationScreen extends StatefulWidget {
   final bool isLogin;
-  const OTPVerificationScreen({super.key, this.isLogin = true});
+  final int? userId;
+  final String? email;
+  final String? mobile;
+  final String? destinationSnippet;
+
+  const OTPVerificationScreen({
+    super.key, 
+    this.isLogin = true,
+    this.userId,
+    this.email,
+    this.mobile,
+    this.destinationSnippet,
+  });
 
   @override
   State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  // ... existing code ...
+  final AuthService _auth = AuthService();
+  bool _isLoading = false;
   final List<TextEditingController> _controllers =
-      List.generate(4, (_) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+      List.generate(6, (_) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   @override
   void dispose() {
@@ -399,10 +561,46 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   }
 
   void _onChanged(String value, int index) {
-    if (value.isNotEmpty && index < 3) {
+    if (value.isNotEmpty && index < 5) {
       _focusNodes[index + 1].requestFocus();
     } else if (value.isEmpty && index > 0) {
       _focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+    );
+  }
+
+  Future<void> _handleVerify() async {
+    final otp = _controllers.map((c) => c.text).join();
+    if (otp.length < 6) {
+      _showError('Please enter the full 6-digit code');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await _auth.verifyOtp(
+        userId: widget.userId,
+        otp: otp,
+        email: widget.email,
+        mobile: widget.mobile,
+      );
+      
+      if (mounted) {
+        Navigator.pushReplacementNamed(
+          context, 
+          '/dashboard',
+          arguments: {'isGuest': false, 'isLogin': widget.isLogin},
+        );
+      }
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -427,20 +625,22 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                             color: Theme.of(context).colorScheme.onSurface,
                             letterSpacing: 1)),
                     const SizedBox(height: 8),
-                    Text('Enter the 4-digit code sent to your email',
+                    Text('Enter the 6-digit code sent to ${widget.destinationSnippet ?? 'your device'}',
                         style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                             fontSize: 14,
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 32),
                     GlassCard(
-                      child: Column(children: [
+                      child: _isLoading 
+                        ? const Center(child: CircularProgressIndicator())
+                        : Column(children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: List.generate(
-                            4,
+                            6,
                             (index) => SizedBox(
-                              width: 60,
+                              width: 45, // Slightly smaller to fit 6
                               child: TextField(
                                 controller: _controllers[index],
                                 focusNode: _focusNodes[index],
@@ -448,13 +648,13 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                                 keyboardType: TextInputType.number,
                                 maxLength: 1,
                                 style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w900,
                                     color: Theme.of(context).colorScheme.onSurface),
                                 decoration: InputDecoration(
                                   counterText: '',
                                   contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 16),
+                                      vertical: 12),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: const BorderSide(
@@ -470,13 +670,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         const SizedBox(height: 32),
                         GradientButton(
                           text: 'Verify',
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(
-                              context, 
-                              '/dashboard',
-                              arguments: {'isGuest': false, 'isLogin': widget.isLogin},
-                            );
-                          },
+                          onPressed: _handleVerify,
                         ),
                         const SizedBox(height: 20),
                         TextButton(
